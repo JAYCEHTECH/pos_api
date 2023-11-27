@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-#4@gzg1#t4+@0lx7fx1=2g_93eyp6k$3j*e4g(wb^x_^4tz#3v
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '127.0.0.1'
+    '127.0.0.1',
     'posapi.bestpaygh.com'
 ]
 
