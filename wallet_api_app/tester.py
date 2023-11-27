@@ -4,7 +4,7 @@ import timeit
 
 
 # Define the base URL without parameters
-base_url = 'http://127.0.0.1:8000/initiate_flexi_transaction/'
+base_url = 'https://posapi.bestpaygh.com/initiate_flexi_transaction/'
 
 # Define parameters
 user_id = '9VA0qyq6lXYPZ6Ut867TVcBvF2t1'
