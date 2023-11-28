@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from urllib3 import Retry
+from django.conf import settings
 
 from . import models, serializers
 # Create your views here.
@@ -21,7 +22,7 @@ from firebase_admin import credentials
 from firebase_admin import db, firestore
 
 if not firebase_admin._apps:
-    cred = credentials.Certificate("wallet_api_app/bestpay-flutter-firebase-adminsdk-23jiw-b242d1c578.json")
+    cred = credentials.Certificate(settings.FIREBASE_ADMIN_CERT)
     firebase_admin.initialize_app(cred, {
         'databaseURL': 'https://bestpay-flutter-default-rtdb.firebaseio.com'
     })

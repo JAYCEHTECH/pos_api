@@ -9,7 +9,6 @@ base_url = 'https://posapi.bestpaygh.com/initiate_flexi_transaction/'
 # Define parameters
 user_id = '9VA0qyq6lXYPZ6Ut867TVcBvF2t1'
 txn_type = 'Flexi Payment'
-txn_id = '123456'
 txn_status = 'success'
 paid_at = '2023-11-27'
 ishare_balance = '50'
@@ -25,7 +24,7 @@ time = '14:30:00'
 date_and_time = '2023-11-27T14:30:00'
 
 # Construct the complete URL with parameters
-url = f"{base_url}{user_id}/{txn_type}/{txn_id}/{txn_status}/{paid_at}/{ishare_balance}/{color_code}/{data_volume}/{reference}/{data_break_down}/{amount}/{receiver}/{date}/{image}/{time}/{date_and_time}/"
+url = f"{base_url}{user_id}/{txn_type}/{txn_status}/{paid_at}/{ishare_balance}/{color_code}/{data_volume}/{reference}/{data_break_down}/{amount}/{receiver}/{date}/{image}/{time}/{date_and_time}/"
 
 # Send POST request
 response = requests.post(url)
