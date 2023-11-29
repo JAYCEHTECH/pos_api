@@ -67,6 +67,7 @@ def get_user_details(user_id):
 
 
 def update_user_wallet(user_id, amount):
+    print("did updating")
     print(f"amount:{amount}")
     user = get_user_details(user_id)
     if user is None:
@@ -394,13 +395,16 @@ class WalletUserBalance(APIView):
 
 class InitiateTransaction(APIView):
     def post(self, request, token, user_id: str, txn_type: str, txn_status: str, paid_at: str,
-             ishare_balance: str,
+             channel: str, ishare_balance: str,
              color_code: str,
              data_volume: str, reference: str, data_break_down: str, amount: str, receiver: str,
              date: str, image, time: str, date_and_time: str):
         if token != config('TOKEN'):
             return Response(data={'message': 'Invalid Authorization Token Provided'}, status=status.HTTP_401_UNAUTHORIZED)
-        enough_balance = check_user_balance_against_price(user_id, amount)
+        if channel.lower() == "wallet":
+            enough_balance = check_user_balance_against_price(user_id, amount)
+        else:
+            enough_balance = True
         print(enough_balance)
         if enough_balance:
             print(enough_balance)
@@ -413,7 +417,8 @@ class InitiateTransaction(APIView):
                                                                                 date, image, time, date_and_time)
             print(status_code)
             print(batch_id)
-            update_user_wallet(user_id, amount)
+            if channel.lower() == "wallet":
+                update_user_wallet(user_id, amount)
             sleep(10)
             ishare_verification_response = ishare_verification(batch_id)
             if ishare_verification_response is not False:
@@ -457,14 +462,12 @@ class InitiateTransaction(APIView):
                         html_content = html_content.replace(placeholder, str(value))
 
 
-
-                    print(html_content)
                     mail_doc_ref.set({
-                        'to': str(email),
+                        'to': email,
                         'message': {
                             'subject': 'Wallet App API Test',
-                            'html': str(html_content),
-                            'messageId': 'Bestpayy'
+                            'html': html_content,
+                            'messageId': 'Bestpay'
                         }
                     })
                 else:
@@ -476,5 +479,103 @@ class InitiateTransaction(APIView):
                 return Response(data={'status_code': status_code, 'batch_id': batch_id}, status=status.HTTP_200_OK)
             else:
                 return Response(data={'status_code': '0001', 'batch_id': 'None'}, status=status.HTTP_200_OK)
-        return Response({"code": '0001', 'message': 'Not enough balance to perform transaction'},
+        else:
+            return Response({"code": '0001', 'message': 'Not enough balance to perform transaction'},
                         status=status.HTTP_200_OK)
+
+
+class InitiateMTNTransaction(APIView):
+    ...
+
+
+class InitiateBigTimeTransaction(APIView):
+    def post(self, request, token, user_id: str, txn_type: str, txn_status: str, paid_at: str,
+             channel: str, ishare_balance: str,
+             color_code: str,
+             data_volume: str, reference: str, data_break_down: str, amount: str, receiver: str,
+             date: str, image, time: str, date_and_time: str):
+        if token != config('TOKEN'):
+            return Response(data={'message': 'Invalid Authorization Token Provided'}, status=status.HTTP_401_UNAUTHORIZED)
+        if channel.lower() == "wallet":
+            print("used this")
+            enough_balance = check_user_balance_against_price(user_id, amount)
+        else:
+            enough_balance = True
+        print(enough_balance)
+        if enough_balance:
+            user_details = get_user_details(user_id)
+            first_name = user_details['first name']
+            last_name = user_details['last name']
+            email = user_details['email']
+            phone = user_details['phone']
+            if channel.lower() == "wallet":
+                print("updated")
+                update_user_wallet(user_id, amount)
+            data = {
+                'batch_id': "unknown",
+                'buyer': phone,
+                'color_code': color_code,
+                'amount': amount,
+                'data_break_down': data_break_down,
+                'data_volume': data_volume,
+                'date': date,
+                'date_and_time': date_and_time,
+                'done': "unknown",
+                'email': email,
+                'image': image,
+                'ishareBalance': ishare_balance,
+                'name': f"{first_name} {last_name}",
+                'number': receiver,
+                'paid_at': paid_at,
+                'reference': reference,
+                'responseCode': 200,
+                'status': txn_status,
+                'time': time,
+                'tranxId': str(tranx_id_gen()),
+                'type': txn_type,
+                'uid': user_id
+            }
+            history_collection.document(date_and_time).set(data)
+            user = history_collection.document(date_and_time)
+            doc = user.get()
+            print(doc.to_dict())
+            tranx_id = doc.to_dict()['tranxId']
+            mail_doc_ref = mail_collection.document()
+            file_path = 'wallet_api_app/mtn_mail.txt'  # Replace with your file path
+
+            name = first_name
+            volume = data_volume
+            date = date_and_time
+            reference_t = reference
+            receiver_t = receiver
+
+            with open(file_path, 'r') as file:
+                html_content = file.read()
+
+            placeholders = {
+                '{name}': name,
+                '{volume}': volume,
+                '{date}': date,
+                '{reference}': reference_t,
+                '{receiver}': receiver_t
+            }
+
+            for placeholder, value in placeholders.items():
+                html_content = html_content.replace(placeholder, str(value))
+
+
+            mail_doc_ref.set({
+                'to': email,
+                'message': {
+                    'subject': 'Big Time API Test',
+                    'html': html_content,
+                    'messageId': 'Bestpay'
+                }
+            })
+            return Response({"code": '0000', 'message': 'Transaction Saved', 'tranx_id': tranx_id},
+                            status=status.HTTP_200_OK)
+        else:
+            return Response({"code": '0001', 'message': 'Not enough balance to perform transaction'},
+                            status=status.HTTP_200_OK)
+
+
