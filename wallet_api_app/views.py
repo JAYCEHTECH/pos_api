@@ -1,6 +1,7 @@
 import datetime
 import json
 import random
+from time import sleep
 
 import requests
 from decouple import config
@@ -30,6 +31,7 @@ if not firebase_admin._apps:
 database = firestore.client()
 user_collection = database.collection(u'Users')
 history_collection = database.collection(u'History')
+mail_collection = database.collection('mail')
 
 
 # all_users = [{**user.to_dict(), "id": user.id} for user in user_collection]
@@ -64,15 +66,34 @@ def get_user_details(user_id):
         return None
 
 
-# def get_user_wallet(user_id):
-#     user = get_user_details(user_id)
-#     if user is None:
-#         return None
-#     user_wallet = user['wallet']
-#     if user_wallet is not None:
-#         return user_wallet
-#     else:
-#         return None
+def update_user_wallet(user_id, amount):
+    print(f"amount:{amount}")
+    user = get_user_details(user_id)
+    if user is None:
+        return None
+    user_wallet = user['wallet']
+    new_balance = float(user_wallet) - float(amount)
+    print(f"new_balance:{new_balance}")
+    print(user_wallet)
+    doc_ref = user_collection.document(user_id)
+    doc_ref.update({'wallet': new_balance})
+    user = get_user_details(user_id)
+    user_wallet = user['wallet']
+    print(f"new_user_wallet: {user_wallet}")
+    if user_wallet is not None:
+        return user_wallet
+    else:
+        return None
+
+
+def tranx_id_gen():
+    tranx_id = random.randint(1111, 99999999)
+    history = history_collection.document(str(tranx_id))
+    doc = history.get()
+    if doc.exists:
+        return tranx_id_gen()
+    else:
+        return str(tranx_id)
 
 
 def check_user_balance_against_price(user_id, price):
@@ -170,20 +191,41 @@ def send_and_save_to_history(user_id, txn_type: str, txn_status: str, paid_at: s
         'responseCode': status_code,
         'status': txn_status,
         'time': time,
-        'tranxId': random.randint(1111, 9999),
+        'tranxId': str(tranx_id_gen()),
         'type': txn_type,
         'uid': user_id
     }
     history_collection.document(date_and_time).set(data)
     print("firebase saved")
-    return status_code, batch_id if batch_id else "No batchId"
+    return status_code, batch_id if batch_id else "No batchId", email, first_name
+
+
+def ishare_verification(batch_id):
+    if batch_id == "No batchId":
+        return False
+
+    url = f"https://backend.boldassure.net:445/live/api/context/business/airteltigo-gh/ishare/tranx-status/{batch_id}"
+
+    payload = {}
+    headers = {
+        'Authorization': config("BEARER_TOKEN")
+    }
+
+    response = requests.request("GET", url, headers=headers, data=payload)
+
+    if response.status_code == 200:
+        json_data = response.json()
+        print(json_data)
+        return json_data
+    else:
+        return False
 
 
 # all_users()
 
 # print(get_user_wallet('9VA0qyq6lXYPZ6Ut867TVcBvF2t1'))
 # print(get_user_details('9VA0qyq6lXYPZ6Ut867TVcBvF2t1'))
-print(check_user_balance_against_price('9VA0qyq6lXYPZ6Ut867TVcBvF2t1', 857585758))
+# print(check_user_balance_against_price('9VA0qyq6lXYPZ6Ut867TVcBvF2t1', 857585758))
 
 
 # get_all_history()
@@ -351,22 +393,88 @@ class WalletUserBalance(APIView):
 
 
 class InitiateTransaction(APIView):
-    def post(self, request, user_id: str, txn_type: str, txn_status: str, paid_at: str,
+    def post(self, request, token, user_id: str, txn_type: str, txn_status: str, paid_at: str,
              ishare_balance: str,
              color_code: str,
              data_volume: str, reference: str, data_break_down: str, amount: str, receiver: str,
              date: str, image, time: str, date_and_time: str):
+        if token != config('TOKEN'):
+            return Response(data={'message': 'Invalid Authorization Token Provided'}, status=status.HTTP_401_UNAUTHORIZED)
         enough_balance = check_user_balance_against_price(user_id, amount)
         print(enough_balance)
         if enough_balance:
             print(enough_balance)
-            status_code, batch_id = send_and_save_to_history(user_id, txn_type, txn_status, paid_at,
-                                                             float(ishare_balance),
-                                                             color_code, float(data_volume), reference, data_break_down,
-                                                             float(amount), receiver,
-                                                             date, image, time, date_and_time)
+            status_code, batch_id, email, first_name = send_and_save_to_history(user_id, txn_type, txn_status, paid_at,
+                                                                                float(ishare_balance),
+                                                                                color_code, float(data_volume),
+                                                                                reference,
+                                                                                data_break_down,
+                                                                                float(amount), receiver,
+                                                                                date, image, time, date_and_time)
             print(status_code)
             print(batch_id)
-            return Response(data={'status_code': status_code, 'batch_id': batch_id}, status=status.HTTP_200_OK)
+            update_user_wallet(user_id, amount)
+            sleep(10)
+            ishare_verification_response = ishare_verification(batch_id)
+            if ishare_verification_response is not False:
+                code = \
+                    ishare_verification_response["flexiIshareTranxStatus"]["flexiIshareTranxStatusResult"][
+                        "apiResponse"][
+                        "responseCode"]
+                ishare_response = \
+                    ishare_verification_response["flexiIshareTranxStatus"]["flexiIshareTranxStatusResult"][
+                        "ishareApiResponseData"][
+                        "apiResponseData"][
+                        0][
+                        "responseMsg"]
+                print(code)
+                print(ishare_response)
+                if code == '200' or ishare_response == 'Crediting Successful.':
+
+                    doc_ref = history_collection.document(date_and_time)
+                    doc_ref.update({'done': 'Successful'})
+                    mail_doc_ref = mail_collection.document(f"{batch_id}-Mail")
+                    file_path = 'wallet_api_app/mail.txt'  # Replace with your file path
+
+                    name = first_name
+                    volume = data_volume
+                    date = date_and_time
+                    reference_t = reference
+                    receiver_t = receiver
+
+                    with open(file_path, 'r') as file:
+                        html_content = file.read()
+
+                    placeholders = {
+                        '{name}': name,
+                        '{volume}': volume,
+                        '{date}': date,
+                        '{reference}': reference_t,
+                        '{receiver}': receiver_t
+                    }
+
+                    for placeholder, value in placeholders.items():
+                        html_content = html_content.replace(placeholder, str(value))
+
+
+
+                    print(html_content)
+                    mail_doc_ref.set({
+                        'to': str(email),
+                        'message': {
+                            'subject': 'Wallet App API Test',
+                            'html': str(html_content),
+                            'messageId': 'Bestpayy'
+                        }
+                    })
+                else:
+                    doc_ref = history_collection.document(date_and_time)
+                    doc_ref.update({'done': 'Failed'})
+                user = history_collection.document(date_and_time)
+                doc = user.get()
+                print(doc.to_dict())
+                return Response(data={'status_code': status_code, 'batch_id': batch_id}, status=status.HTTP_200_OK)
+            else:
+                return Response(data={'status_code': '0001', 'batch_id': 'None'}, status=status.HTTP_200_OK)
         return Response({"code": '0001', 'message': 'Not enough balance to perform transaction'},
                         status=status.HTTP_200_OK)
