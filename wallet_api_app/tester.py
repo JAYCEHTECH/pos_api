@@ -4,19 +4,19 @@ import timeit
 
 
 # Define the base URL without parameters
-base_url = 'http://127.0.0.1:8000/initiate_bigtime_transaction/'
+base_url = 'http://127.0.0.1:8000/initiate_mtn_transaction/'
 
 # Define parameters
-token = "TOKEN 38EWIWJIWJDIWJQED8WJIDJIDSAJIHUSAYHDY8WYEHUHDUHES8FYWY8EYHD8WH8HD8HEW8DHEDH98EWJ8CSHJE8FDEW"
+token = "D8WJIDJIDSAJIHUSAYHDY8WYEHUHDUHES8FYWY8EYHD8WH8H"
 user_id = '9VA0qyq6lXYPZ6Ut867TVcBvF2t1'
-txn_type = 'BigTime'
+txn_type = 'MTN'
 txn_status = 'success'
 paid_at = '2023-11-27'
 channel = 'wallet'
 ishare_balance = '50'
 color_code = 'Green'  # URL encoded '#FFA500'
-data_volume = '51'
-reference = 'esaeaes'
+data_volume = '58'
+reference = '757'
 data_break_down = 'tdt'
 amount = '5'
 receiver = '0242442147'
@@ -38,13 +38,15 @@ if response.status_code == 200:
 else:
     print("Request failed. Status code:", response.status_code)
 
-
-
-
-# file_path = 'wallet_api_app/mail.txt'  # Replace with your file path
 #
-# with open(file_path, 'r') as file:
-#     html_content = file.read()
 #
-# # print(html_content)
-# print(type(html_content))
+#
+# # file_path = 'wallet_api_app/mail.txt'  # Replace with your file path
+# #
+# # with open(file_path, 'r') as file:
+# #     html_content = file.read()
+# #
+# # # print(html_content)
+# # print(type(html_content))
+
+

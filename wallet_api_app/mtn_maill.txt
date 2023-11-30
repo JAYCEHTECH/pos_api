@@ -313,7 +313,7 @@
                             <td style="background-image: url('https://img.freepik.com/free-photo/abstract-blue-geometric-shapes-background_24972-1841.jpg'); background-size: 500px 200px; background-repeat: no-repeat; padding: 30px 0;">
                               <h3 style="margin-bottom: 0; font-size: 13px;">Hello {name}</h3>
                               <div style="width: 15%; height: 8px; background-color: #2DB1FF; margin: 20px auto 20px;"></div>
-                              <h4 style="margin-top: 0;">{volume} MB <span style="color: #2DB1FF;">DATA ON ITS WAY TO YOU</span></h2>
+                              <h4 style="margin-top: 0;"><span style="color: #2DB1FF;">Your MTN Bundle transaction is being processed</span></h2>
                               <p><span style="font-weight: bold;">Service Provider:</span> Bestpay</p>
                               <p style="font-size: 11px;"><span style="font-weight: bold; font-size: 11px;">Transaction Date:</span> {date}</p>
                             </td>
@@ -321,7 +321,7 @@
                           <tr>
                             <td style="margin-top: 50px;">
                               <p style="font-size: 11px; margin-top: 35px; margin-bottom: 0;"><span style="font-weight: bold; font-size: 11px;">Receipient Number:</span> {receiver}</p>
-                              <p style="font-size: 11px; margin-top: 0;"><span style="font-weight: bold; font-size: 11px;">Data Volume (MB):</span> {volume}</p>
+                              <p style="font-size: 11px; margin-top: 0;"><span style="font-weight: bold; font-size: 11px;">Data (MB):</span> {volume}</p>
                             </td>
                           </tr>
                           <tr style="text-align: center;">
@@ -344,7 +344,7 @@
                       <td class="aligncenter content-block">
                         <span style="font-size: 8px;">Powered by</span> <br>
                         <a style="text-decoration: none;" href="/cdn-cgi/l/email-protection#a9"
-                          ><img style="display: inline; width: 20px;" src="https://uploads-ssl.webflow.com/60db56d3192ab9eed01eb92b/6557573af9aabea6060818cc_new-bp.png" alt=""><span
+                          ><img style="display: inline; width: 30px;" src="https://uploads-ssl.webflow.com/60db56d3192ab9eed01eb92b/6557573af9aabea6060818cc_new-bp.png" alt=""><span
                             style="color: #000;"
                             ><b>Bestpay</b></span
                           ></a

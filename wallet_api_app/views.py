@@ -16,6 +16,7 @@ from urllib3 import Retry
 from django.conf import settings
 
 from . import models, serializers
+from .other_tests import tranx_id_generator
 # Create your views here.
 
 import firebase_admin
@@ -88,7 +89,7 @@ def update_user_wallet(user_id, amount):
 
 
 def tranx_id_gen():
-    tranx_id = random.randint(1111, 99999999)
+    tranx_id = tranx_id_generator()
     history = history_collection.document(str(tranx_id))
     doc = history.get()
     if doc.exists:
@@ -356,41 +357,37 @@ class WalletUserBalance(APIView):
         # wallet = user_dict["wallet_balance"]
         # return Response({'code': '0000', 'wallet_balance': wallet}, status=status.HTTP_200_OK)
 
-    def post(self, request, user_id, *args, **kwargs):
+    def post(self, request, token, user_id, amount, *args, **kwargs):
+        if token != config('TOKEN'):
+            return Response(data={'message': 'Invalid Authorization Token Provided'}, status=status.HTTP_401_UNAUTHORIZED)
         user_instance = self.get_object(user_id)
         if not user_instance:
             return Response({
                 "message": "User does not exist"
             }, status=status.HTTP_404_NOT_FOUND)
         data = {
-            'user_id': request.data.get('user_id'),
-            'top_up_amount': request.data.get('top_up_amount'),
+            'user_id': user_id,
+            'top_up_amount': amount,
         }
         print(data)
-        # user_data = user_instance.get()
-        # try:
-        #     user_dict = dict(user_data)
-        #     previous_wallet_balance = user_dict["wallet_balance"]
-        # except ValueError:
-        #     return Response({'code': '0001', 'message': "User not found"}, status=status.HTTP_400_BAD_REQUEST)
-        # serializer = serializers.WalletUserSerializer(data=data)
-        # try:
-        #     converted = float(data['top_up_amount'])
-        # except ValueError:
-        #     return Response({'message': "Invalid wallet balance provided"}, status=status.HTTP_400_BAD_REQUEST)
-        # if serializer.is_valid():
-        #     to_be_added = data['top_up_amount']
-        #     new_balance = previous_wallet_balance + to_be_added
-        #     users_ref.child(user_id).update(
-        #         {
-        #             'wallet_balance': new_balance,
-        #         }
-        #     )
-        #     new_user_details = users_ref.child(user_id).get()
-        #     return Response({"code": "0000", "message": "Wallet Crediting Successful", "data":{'previousBalance': previous_wallet_balance, 'currentBalance': new_balance}},
-        #                     status=status.HTTP_200_OK)
-        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        ...
+        user_details = get_user_details(user_id)
+        try:
+            previous_wallet_balance = user_details['wallet']
+        except ValueError:
+            return Response({'code': '0001', 'message': "User not found"}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = serializers.WalletUserSerializer(data=data)
+        try:
+            converted = float(amount)
+        except ValueError:
+            return Response({'message': "Invalid wallet balance provided"}, status=status.HTTP_400_BAD_REQUEST)
+        if serializer.is_valid():
+            to_be_added = float(amount)
+            new_balance = previous_wallet_balance + to_be_added
+            doc_ref = user_collection.document(user_id)
+            doc_ref.update({'wallet': new_balance})
+            return Response({"code": "0000", "message": "Wallet Crediting Successful", "data": {'previousBalance': previous_wallet_balance, 'currentBalance': new_balance}},
+                            status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class InitiateTransaction(APIView):
@@ -465,7 +462,7 @@ class InitiateTransaction(APIView):
                     mail_doc_ref.set({
                         'to': email,
                         'message': {
-                            'subject': 'Wallet App API Test',
+                            'subject': 'AT Flexi Bundle',
                             'html': html_content,
                             'messageId': 'Bestpay'
                         }
@@ -484,8 +481,8 @@ class InitiateTransaction(APIView):
                         status=status.HTTP_200_OK)
 
 
-class InitiateMTNTransaction(APIView):
-    ...
+# class InitiateMTNTransaction(APIView):
+#     ...
 
 
 class InitiateBigTimeTransaction(APIView):
@@ -567,7 +564,7 @@ class InitiateBigTimeTransaction(APIView):
             mail_doc_ref.set({
                 'to': email,
                 'message': {
-                    'subject': 'Big Time API Test',
+                    'subject': 'Big Time Data',
                     'html': html_content,
                     'messageId': 'Bestpay'
                 }
@@ -579,3 +576,92 @@ class InitiateBigTimeTransaction(APIView):
                             status=status.HTTP_200_OK)
 
 
+class InitiateMTNTransaction(APIView):
+    def post(self, request, token, user_id: str, txn_type: str, txn_status: str, paid_at: str,
+             channel: str, ishare_balance: str,
+             color_code: str,
+             data_volume: str, reference: str, data_break_down: str, amount: str, receiver: str,
+             date: str, image, time: str, date_and_time: str):
+        if token != config('TOKEN'):
+            return Response(data={'message': 'Invalid Authorization Token Provided'}, status=status.HTTP_401_UNAUTHORIZED)
+        if channel.lower() == "wallet":
+            print("used this")
+            enough_balance = check_user_balance_against_price(user_id, amount)
+        else:
+            enough_balance = True
+        print(enough_balance)
+        if enough_balance:
+            user_details = get_user_details(user_id)
+            first_name = user_details['first name']
+            last_name = user_details['last name']
+            email = user_details['email']
+            phone = user_details['phone']
+            if channel.lower() == "wallet":
+                print("updated")
+                update_user_wallet(user_id, amount)
+            data = {
+                'batch_id': "unknown",
+                'buyer': phone,
+                'color_code': color_code,
+                'amount': amount,
+                'data_break_down': data_break_down,
+                'data_volume': data_volume,
+                'date': date,
+                'date_and_time': date_and_time,
+                'done': "unknown",
+                'email': email,
+                'image': image,
+                'ishareBalance': ishare_balance,
+                'name': f"{first_name} {last_name}",
+                'number': receiver,
+                'paid_at': paid_at,
+                'reference': reference,
+                'responseCode': 200,
+                'status': txn_status,
+                'time': time,
+                'tranxId': str(tranx_id_gen()),
+                'type': txn_type,
+                'uid': user_id
+            }
+            history_collection.document(date_and_time).set(data)
+            user = history_collection.document(date_and_time)
+            doc = user.get()
+            print(doc.to_dict())
+            tranx_id = doc.to_dict()['tranxId']
+            mail_doc_ref = mail_collection.document()
+            file_path = 'wallet_api_app/mtn_maill.txt'  # Replace with your file path
+
+            name = first_name
+            volume = data_volume
+            date = date_and_time
+            reference_t = reference
+            receiver_t = receiver
+
+            with open(file_path, 'r') as file:
+                html_content = file.read()
+
+            placeholders = {
+                '{name}': name,
+                '{volume}': volume,
+                '{date}': date,
+                '{reference}': reference_t,
+                '{receiver}': receiver_t
+            }
+
+            for placeholder, value in placeholders.items():
+                html_content = html_content.replace(placeholder, str(value))
+
+
+            mail_doc_ref.set({
+                'to': email,
+                'message': {
+                    'subject': 'MTN Data',
+                    'html': html_content,
+                    'messageId': 'Bestpay'
+                }
+            })
+            return Response({"code": '0000', 'message': 'Transaction Saved', 'tranx_id': tranx_id},
+                            status=status.HTTP_200_OK)
+        else:
+            return Response({"code": '0001', 'message': 'Not enough balance to perform transaction'},
+                            status=status.HTTP_200_OK)

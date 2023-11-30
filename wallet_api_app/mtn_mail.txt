@@ -310,7 +310,7 @@
                             </td>
                           </tr>
                           <tr>
-                            <td style="background-image: url('https://png.pngtree.com/thumb_back/fh260/background/20210811/pngtree-white-and-grey-3d-wall-pattern-background-image-vector-image_760915.jpg'); padding: 30px 0;">
+                            <td style="background-image: url('https://img.freepik.com/free-photo/abstract-blue-geometric-shapes-background_24972-1841.jpg'); background-size: 500px 200px; background-repeat: no-repeat; padding: 30px 0;">
                               <h3 style="margin-bottom: 0; font-size: 13px;">Hello {name}</h3>
                               <div style="width: 15%; height: 8px; background-color: #2DB1FF; margin: 20px auto 20px;"></div>
                               <h4 style="margin-top: 0;"><span style="color: #2DB1FF;">Your Big Time transaction is being processed</span></h2>
