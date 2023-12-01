@@ -5,7 +5,7 @@ from time import sleep
 
 import requests
 from decouple import config
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 from requests.adapters import HTTPAdapter
 from rest_framework.views import APIView
@@ -34,7 +34,7 @@ database = firestore.client()
 user_collection = database.collection(u'Users')
 history_collection = database.collection(u'History')
 mail_collection = database.collection('mail')
-mtn_history = database.collection()
+# mtn_history = database.collection()
 
 
 # all_users = [{**user.to_dict(), "id": user.id} for user in user_collection]
@@ -399,7 +399,7 @@ class InitiateTransaction(APIView):
             channel: str, ishare_balance: str,
             color_code: str,
             data_volume: str, reference: str, data_break_down: str, amount: str, receiver: str,
-            date: str, image, time: str, date_and_time: str):
+            date: str, image, time: str, date_and_time: str, callback_url: str):
         if token != config('TOKEN'):
             return Response(data={'message': 'Invalid Authorization Token Provided'},
                             status=status.HTTP_401_UNAUTHORIZED)
@@ -478,12 +478,12 @@ class InitiateTransaction(APIView):
                 doc = user.get()
                 print(doc.to_dict())
                 # return Response(data={'status_code': status_code, 'batch_id': batch_id}, status=status.HTTP_200_OK)
-                return redirect('https://www.google.com')
+                return redirect(callback_url)
             else:
-                return redirect('https://www.google.com')
+                return redirect(callback_url)
                 # return Response(data={'status_code': '0001', 'batch_id': 'None'}, status=status.HTTP_200_OK)
         else:
-            return redirect('https://www.yahoo.com')
+            return redirect(callback_url)
             # return Response({"code": '0001', 'message': 'Not enough balance to perform transaction'},
             #                 status=status.HTTP_200_OK)
 
@@ -497,7 +497,7 @@ class InitiateBigTimeTransaction(APIView):
              channel: str, ishare_balance: str,
              color_code: str,
              data_volume: str, reference: str, data_break_down: str, amount: str, receiver: str,
-             date: str, image, time: str, date_and_time: str):
+             date: str, image, time: str, date_and_time: str, callback_url: str):
         if token != config('TOKEN'):
             return Response(data={'message': 'Invalid Authorization Token Provided'},
                             status=status.HTTP_401_UNAUTHORIZED)
@@ -576,8 +576,7 @@ class InitiateBigTimeTransaction(APIView):
                     'messageId': 'Bestpay'
                 }
             })
-            return Response({"code": '0000', 'message': 'Transaction Saved', 'tranx_id': tranx_id},
-                            status=status.HTTP_200_OK)
+            return redirect(callback_url)
         else:
             return Response({"code": '0001', 'message': 'Not enough balance to perform transaction'},
                             status=status.HTTP_200_OK)
@@ -588,7 +587,7 @@ class InitiateMTNTransaction(APIView):
             channel: str, ishare_balance: str,
             color_code: str,
             data_volume: str, reference: str, data_break_down: str, amount: str, receiver: str,
-            date: str, image, time: str, date_and_time: str):
+            date: str, image, time: str, date_and_time: str,  callback_url: str):
         if token != config('TOKEN'):
             return Response(data={'message': 'Invalid Authorization Token Provided'},
                             status=status.HTTP_401_UNAUTHORIZED)
@@ -667,8 +666,7 @@ class InitiateMTNTransaction(APIView):
                     'messageId': 'Bestpay'
                 }
             })
-            return Response({"code": '0000', 'message': 'Transaction Saved', 'tranx_id': tranx_id},
-                            status=status.HTTP_200_OK)
+            return redirect(callback_url)
         else:
             return Response({"code": '0001', 'message': 'Not enough balance to perform transaction'},
                             status=status.HTTP_200_OK)
