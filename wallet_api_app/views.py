@@ -6,7 +6,7 @@ from time import sleep
 import requests
 from decouple import config
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from requests.adapters import HTTPAdapter
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -34,6 +34,7 @@ database = firestore.client()
 user_collection = database.collection(u'Users')
 history_collection = database.collection(u'History')
 mail_collection = database.collection('mail')
+mtn_history = database.collection()
 
 
 # all_users = [{**user.to_dict(), "id": user.id} for user in user_collection]
@@ -476,12 +477,15 @@ class InitiateTransaction(APIView):
                 user = history_collection.document(date_and_time)
                 doc = user.get()
                 print(doc.to_dict())
-                return Response(data={'status_code': status_code, 'batch_id': batch_id}, status=status.HTTP_200_OK)
+                # return Response(data={'status_code': status_code, 'batch_id': batch_id}, status=status.HTTP_200_OK)
+                return redirect('https://www.google.com')
             else:
-                return Response(data={'status_code': '0001', 'batch_id': 'None'}, status=status.HTTP_200_OK)
+                return redirect('https://www.google.com')
+                # return Response(data={'status_code': '0001', 'batch_id': 'None'}, status=status.HTTP_200_OK)
         else:
-            return Response({"code": '0001', 'message': 'Not enough balance to perform transaction'},
-                            status=status.HTTP_200_OK)
+            return redirect('https://www.yahoo.com')
+            # return Response({"code": '0001', 'message': 'Not enough balance to perform transaction'},
+            #                 status=status.HTTP_200_OK)
 
 
 # class InitiateMTNTransaction(APIView):
