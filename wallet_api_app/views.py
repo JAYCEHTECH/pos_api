@@ -22,6 +22,7 @@ from .other_tests import tranx_id_generator
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db, firestore
+from secrets import compare_digest
 
 if not firebase_admin._apps:
     cred = credentials.Certificate(settings.FIREBASE_ADMIN_CERT)
@@ -358,8 +359,9 @@ class WalletUserBalance(APIView):
         # return Response({'code': '0000', 'wallet_balance': wallet}, status=status.HTTP_200_OK)
 
     def post(self, request, token, user_id, amount, *args, **kwargs):
-        if token != config('TOKEN'):
-            return Response(data={'message': 'Invalid Authorization Token Provided'}, status=status.HTTP_401_UNAUTHORIZED)
+        if compare_digest(token, config('TOKEN')):
+            return Response(data={'message': 'Invalid Authorization Token Provided'},
+                            status=status.HTTP_401_UNAUTHORIZED)
         user_instance = self.get_object(user_id)
         if not user_instance:
             return Response({
@@ -385,19 +387,21 @@ class WalletUserBalance(APIView):
             new_balance = previous_wallet_balance + to_be_added
             doc_ref = user_collection.document(user_id)
             doc_ref.update({'wallet': new_balance})
-            return Response({"code": "0000", "message": "Wallet Crediting Successful", "data": {'previousBalance': previous_wallet_balance, 'currentBalance': new_balance}},
+            return Response({"code": "0000", "message": "Wallet Crediting Successful",
+                             "data": {'previousBalance': previous_wallet_balance, 'currentBalance': new_balance}},
                             status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class InitiateTransaction(APIView):
-    def post(self, request, token, user_id: str, txn_type: str, txn_status: str, paid_at: str,
-             channel: str, ishare_balance: str,
-             color_code: str,
-             data_volume: str, reference: str, data_break_down: str, amount: str, receiver: str,
-             date: str, image, time: str, date_and_time: str):
+    def get(self, request, token, user_id: str, txn_type: str, txn_status: str, paid_at: str,
+            channel: str, ishare_balance: str,
+            color_code: str,
+            data_volume: str, reference: str, data_break_down: str, amount: str, receiver: str,
+            date: str, image, time: str, date_and_time: str):
         if token != config('TOKEN'):
-            return Response(data={'message': 'Invalid Authorization Token Provided'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(data={'message': 'Invalid Authorization Token Provided'},
+                            status=status.HTTP_401_UNAUTHORIZED)
         if channel.lower() == "wallet":
             enough_balance = check_user_balance_against_price(user_id, amount)
         else:
@@ -458,7 +462,6 @@ class InitiateTransaction(APIView):
                     for placeholder, value in placeholders.items():
                         html_content = html_content.replace(placeholder, str(value))
 
-
                     mail_doc_ref.set({
                         'to': email,
                         'message': {
@@ -478,7 +481,7 @@ class InitiateTransaction(APIView):
                 return Response(data={'status_code': '0001', 'batch_id': 'None'}, status=status.HTTP_200_OK)
         else:
             return Response({"code": '0001', 'message': 'Not enough balance to perform transaction'},
-                        status=status.HTTP_200_OK)
+                            status=status.HTTP_200_OK)
 
 
 # class InitiateMTNTransaction(APIView):
@@ -486,13 +489,14 @@ class InitiateTransaction(APIView):
 
 
 class InitiateBigTimeTransaction(APIView):
-    def post(self, request, token, user_id: str, txn_type: str, txn_status: str, paid_at: str,
+    def get(self, request, token, user_id: str, txn_type: str, txn_status: str, paid_at: str,
              channel: str, ishare_balance: str,
              color_code: str,
              data_volume: str, reference: str, data_break_down: str, amount: str, receiver: str,
              date: str, image, time: str, date_and_time: str):
         if token != config('TOKEN'):
-            return Response(data={'message': 'Invalid Authorization Token Provided'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(data={'message': 'Invalid Authorization Token Provided'},
+                            status=status.HTTP_401_UNAUTHORIZED)
         if channel.lower() == "wallet":
             print("used this")
             enough_balance = check_user_balance_against_price(user_id, amount)
@@ -560,7 +564,6 @@ class InitiateBigTimeTransaction(APIView):
             for placeholder, value in placeholders.items():
                 html_content = html_content.replace(placeholder, str(value))
 
-
             mail_doc_ref.set({
                 'to': email,
                 'message': {
@@ -577,13 +580,14 @@ class InitiateBigTimeTransaction(APIView):
 
 
 class InitiateMTNTransaction(APIView):
-    def post(self, request, token, user_id: str, txn_type: str, txn_status: str, paid_at: str,
-             channel: str, ishare_balance: str,
-             color_code: str,
-             data_volume: str, reference: str, data_break_down: str, amount: str, receiver: str,
-             date: str, image, time: str, date_and_time: str):
+    def get(self, request, token, user_id: str, txn_type: str, txn_status: str, paid_at: str,
+            channel: str, ishare_balance: str,
+            color_code: str,
+            data_volume: str, reference: str, data_break_down: str, amount: str, receiver: str,
+            date: str, image, time: str, date_and_time: str):
         if token != config('TOKEN'):
-            return Response(data={'message': 'Invalid Authorization Token Provided'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(data={'message': 'Invalid Authorization Token Provided'},
+                            status=status.HTTP_401_UNAUTHORIZED)
         if channel.lower() == "wallet":
             print("used this")
             enough_balance = check_user_balance_against_price(user_id, amount)
@@ -650,7 +654,6 @@ class InitiateMTNTransaction(APIView):
 
             for placeholder, value in placeholders.items():
                 html_content = html_content.replace(placeholder, str(value))
-
 
             mail_doc_ref.set({
                 'to': email,
