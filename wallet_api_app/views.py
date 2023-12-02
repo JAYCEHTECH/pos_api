@@ -478,12 +478,12 @@ class InitiateTransaction(APIView):
                 doc = user.get()
                 print(doc.to_dict())
                 # return Response(data={'status_code': status_code, 'batch_id': batch_id}, status=status.HTTP_200_OK)
-                return redirect(callback_url)
+                return redirect(f"https://{callback_url}")
             else:
-                return redirect(callback_url)
+                return redirect(f"https://{callback_url}")
                 # return Response(data={'status_code': '0001', 'batch_id': 'None'}, status=status.HTTP_200_OK)
         else:
-            return redirect(callback_url)
+            return redirect(f"https://{callback_url}")
             # return Response({"code": '0001', 'message': 'Not enough balance to perform transaction'},
             #                 status=status.HTTP_200_OK)
 
@@ -576,7 +576,7 @@ class InitiateBigTimeTransaction(APIView):
                     'messageId': 'Bestpay'
                 }
             })
-            return redirect(callback_url)
+            return redirect(f"https://{callback_url}")
         else:
             return Response({"code": '0001', 'message': 'Not enough balance to perform transaction'},
                             status=status.HTTP_200_OK)
@@ -666,7 +666,7 @@ class InitiateMTNTransaction(APIView):
                     'messageId': 'Bestpay'
                 }
             })
-            return redirect(callback_url)
+            return redirect(f"https://{callback_url}")
         else:
             return Response({"code": '0001', 'message': 'Not enough balance to perform transaction'},
                             status=status.HTTP_200_OK)
