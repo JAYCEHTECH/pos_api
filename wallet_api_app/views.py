@@ -345,12 +345,12 @@ class WalletUserBalance(APIView):
         except TypeError:
             return None
 
-    def get(self, request, user_id, *args, **kwargs):
-        user_instance = self.get_object(user_id)
-        if not user_instance:
-            return Response({
-                "message": "User does not exist"
-            }, status=status.HTTP_404_NOT_FOUND)
+    # def get(self, request, user_id, *args, **kwargs):
+    #     user_instance = self.get_object(user_id)
+    #     if not user_instance:
+    #         return Response({
+    #             "message": "User does not exist"
+    #         }, status=status.HTTP_404_NOT_FOUND)
         # serializer = user_instance.get()
         # try:
         #     user_dict = dict(serializer)
@@ -359,8 +359,8 @@ class WalletUserBalance(APIView):
         # wallet = user_dict["wallet_balance"]
         # return Response({'code': '0000', 'wallet_balance': wallet}, status=status.HTTP_200_OK)
 
-    def post(self, request, token, user_id, amount, *args, **kwargs):
-        if compare_digest(token, config('TOKEN')):
+    def get(self, request, token, user_id, amount, callback_url, *args, **kwargs):
+        if token != config('TOKEN'):
             return Response(data={'message': 'Invalid Authorization Token Provided'},
                             status=status.HTTP_401_UNAUTHORIZED)
         user_instance = self.get_object(user_id)
@@ -388,9 +388,7 @@ class WalletUserBalance(APIView):
             new_balance = previous_wallet_balance + to_be_added
             doc_ref = user_collection.document(user_id)
             doc_ref.update({'wallet': new_balance})
-            return Response({"code": "0000", "message": "Wallet Crediting Successful",
-                             "data": {'previousBalance': previous_wallet_balance, 'currentBalance': new_balance}},
-                            status=status.HTTP_200_OK)
+            return redirect(f"https://{callback_url}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
