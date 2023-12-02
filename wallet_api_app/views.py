@@ -32,7 +32,7 @@ if not firebase_admin._apps:
 
 database = firestore.client()
 user_collection = database.collection(u'Users')
-history_collection = database.collection(u'History')
+history_collection = database.collection(u'History Web')
 mail_collection = database.collection('mail')
 mtn_history = database.collection('MTN_Admin_History')
 mtn_tranx = mtn_history.document('mtnTransactions')
