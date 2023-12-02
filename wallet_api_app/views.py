@@ -34,7 +34,12 @@ database = firestore.client()
 user_collection = database.collection(u'Users')
 history_collection = database.collection(u'History')
 mail_collection = database.collection('mail')
-# mtn_history = database.collection()
+mtn_history = database.collection('MTN_Admin_History')
+mtn_tranx = mtn_history.document('mtnTransactions')
+mtn_other = mtn_tranx.collection('mtnOther')
+
+tranx = mtn_other.document('2023-08-01T08:37:29.293035').get()
+print(tranx.to_dict())
 
 
 # all_users = [{**user.to_dict(), "id": user.id} for user in user_collection]
@@ -351,13 +356,13 @@ class WalletUserBalance(APIView):
     #         return Response({
     #             "message": "User does not exist"
     #         }, status=status.HTTP_404_NOT_FOUND)
-        # serializer = user_instance.get()
-        # try:
-        #     user_dict = dict(serializer)
-        # except TypeError:
-        #     return Response({'code': '0001', 'message': "User not found"}, status=status.HTTP_400_BAD_REQUEST)
-        # wallet = user_dict["wallet_balance"]
-        # return Response({'code': '0000', 'wallet_balance': wallet}, status=status.HTTP_200_OK)
+    # serializer = user_instance.get()
+    # try:
+    #     user_dict = dict(serializer)
+    # except TypeError:
+    #     return Response({'code': '0001', 'message': "User not found"}, status=status.HTTP_400_BAD_REQUEST)
+    # wallet = user_dict["wallet_balance"]
+    # return Response({'code': '0000', 'wallet_balance': wallet}, status=status.HTTP_200_OK)
 
     def get(self, request, token, user_id, amount, callback_url, *args, **kwargs):
         if token != config('TOKEN'):
@@ -492,10 +497,10 @@ class InitiateTransaction(APIView):
 
 class InitiateBigTimeTransaction(APIView):
     def get(self, request, token, user_id: str, txn_type: str, txn_status: str, paid_at: str,
-             channel: str, ishare_balance: str,
-             color_code: str,
-             data_volume: str, reference: str, data_break_down: str, amount: str, receiver: str,
-             date: str, image, time: str, date_and_time: str, callback_url: str):
+            channel: str, ishare_balance: str,
+            color_code: str,
+            data_volume: str, reference: str, data_break_down: str, amount: str, receiver: str,
+            date: str, image, time: str, date_and_time: str, callback_url: str):
         if token != config('TOKEN'):
             return Response(data={'message': 'Invalid Authorization Token Provided'},
                             status=status.HTTP_401_UNAUTHORIZED)
@@ -585,7 +590,7 @@ class InitiateMTNTransaction(APIView):
             channel: str, ishare_balance: str,
             color_code: str,
             data_volume: str, reference: str, data_break_down: str, amount: str, receiver: str,
-            date: str, image, time: str, date_and_time: str,  callback_url: str):
+            date: str, image, time: str, date_and_time: str, callback_url: str):
         if token != config('TOKEN'):
             return Response(data={'message': 'Invalid Authorization Token Provided'},
                             status=status.HTTP_401_UNAUTHORIZED)
@@ -628,11 +633,40 @@ class InitiateMTNTransaction(APIView):
                 'type': txn_type,
                 'uid': user_id
             }
+
+
             history_collection.document(date_and_time).set(data)
             user = history_collection.document(date_and_time)
             doc = user.get()
             print(doc.to_dict())
             tranx_id = doc.to_dict()['tranxId']
+            second_data = {
+                'amount': "6",
+                'batch_id': "unknown",
+                'channel': channel,
+                'color_code': color_code,
+                'created_at': date_and_time,
+                'data_volume': data_volume,
+                'date': date,
+                'date_and_time': date_and_time,
+                'image': "",
+                'ip_address': "",
+                'ishareBalance': 0,
+                'name': f"{first_name} {last_name}",
+                'number': receiver,
+                'paid_at': date_and_time,
+                'payment_status': "success",
+                'reference': reference,
+                'status': "Completed",
+                'time': time,
+                'tranxId': tranx_id,
+                'type': "MTN Other Data"
+            }
+            mtn_other.document(date_and_time).set(second_data)
+            user22 = mtn_other.document(date_and_time)
+            pu = user22.get()
+            print(pu.to_dict())
+            print("pu")
             mail_doc_ref = mail_collection.document()
             file_path = 'wallet_api_app/mtn_maill.txt'  # Replace with your file path
 
