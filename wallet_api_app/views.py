@@ -38,8 +38,6 @@ mtn_history = database.collection('MTN_Admin_History')
 mtn_tranx = mtn_history.document('mtnTransactions')
 mtn_other = mtn_tranx.collection('mtnOther')
 
-tranx = mtn_other.document('2023-08-01T08:37:29.293035').get()
-print(tranx.to_dict())
 
 
 # all_users = [{**user.to_dict(), "id": user.id} for user in user_collection]
@@ -484,7 +482,6 @@ class InitiateTransaction(APIView):
                 return redirect(f"https://{callback_url}")
             else:
                 return redirect(f"https://{callback_url}")
-                # return Response(data={'status_code': '0001', 'batch_id': 'None'}, status=status.HTTP_200_OK)
         else:
             return redirect(f"https://{callback_url}")
             # return Response({"code": '0001', 'message': 'Not enough balance to perform transaction'},
