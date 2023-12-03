@@ -37,6 +37,7 @@ mail_collection = database.collection('mail')
 mtn_history = database.collection('MTN_Admin_History')
 mtn_tranx = mtn_history.document('mtnTransactions')
 mtn_other = mtn_tranx.collection('mtnOther')
+bearer_token_collection = database.collection("_KeysAndBearer")
 
 
 
@@ -140,8 +141,13 @@ def send_ishare_bundle(first_name: str, last_name: str, buyer, receiver: str, em
         "active": True
     })
 
+    token = user_collection.document("Active_API_BoldAssure")
+    token_doc = token.get()
+    token_doc_dict = token_doc.dict()
+    tokennn = token_doc_dict['ishare_bearer']
+
     headers = {
-        'Authorization': config("BEARER_TOKEN"),
+        'Authorization': tokennn,
         'Content-Type': 'application/json'
     }
     print("here")
@@ -391,6 +397,10 @@ class WalletUserBalance(APIView):
             new_balance = previous_wallet_balance + to_be_added
             doc_ref = user_collection.document(user_id)
             doc_ref.update({'wallet': new_balance})
+            sms_message = f"GHS {to_be_added} was deposited in your wallet. Available balance is now GHS {new_balance}"
+            sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to=0{user_details['phone']}&from=InternetHub&sms={sms_message}"
+            response = requests.request("GET", url=sms_url)
+            print(response.status_code)
             return redirect(f"https://{callback_url}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
