@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
-    'wallet_api_app'
+    'wallet_api_app',
     'corsheaders'
 ]
 
