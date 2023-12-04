@@ -38,6 +38,7 @@ mtn_history = database.collection('MTN_Admin_History')
 mtn_tranx = mtn_history.document('mtnTransactions')
 mtn_other = mtn_tranx.collection('mtnOther')
 bearer_token_collection = database.collection("_KeysAndBearer")
+history_web = database.collection(u'History Web').document('all_users')
 
 
 
@@ -209,6 +210,7 @@ def send_and_save_to_history(user_id, txn_type: str, txn_status: str, paid_at: s
         'uid': user_id
     }
     history_collection.document(date_and_time).set(data)
+    history_web.collection(email).document(date_and_time).set(data)
     print("firebase saved")
     return status_code, batch_id if batch_id else "No batchId", email, first_name
 
@@ -585,6 +587,7 @@ class InitiateBigTimeTransaction(APIView):
                 'uid': user_id
             }
             history_collection.document(date_and_time).set(data)
+            history_web.collection(email).document(date_and_time).set(data)
             mtn_other.document(date_and_time).set(data)
             user = history_collection.document(date_and_time)
             doc = user.get()
@@ -678,6 +681,7 @@ class InitiateMTNTransaction(APIView):
 
 
             history_collection.document(date_and_time).set(data)
+            history_web.collection(email).document(date_and_time).set(data)
             user = history_collection.document(date_and_time)
             doc = user.get()
             print(doc.to_dict())
