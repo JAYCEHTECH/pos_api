@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'wallet_api_app'
+    'corsheaders'
 ]
 
 REST_FRAMEWORK = {
@@ -56,11 +57,47 @@ REST_FRAMEWORK = {
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+CORS_ALLOWED_ORIGINS = [  # Replace with your allowed domain(s)
+   'https://test.bestpaygh.com',
+]
+
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+
+CORS_ALLOW_HEADERS = [
+    'Accept',
+    'accept-encoding',
+    'Accept-Language',
+    'Content-Type',
+    'Authorization'
+    'Api-Key',
+    'Api-Secret',
+    'api-key',
+    'api-secret',
+    'x-api-key'
+    'x-api-secret'
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'cache-control',
+    'pragma',
+    'Access-Control-Allow-Methods',
+    'Access-Control-Allow-Headers'
 ]
 
 ROOT_URLCONF = 'wallet_api.urls'
