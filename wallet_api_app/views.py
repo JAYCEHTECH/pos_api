@@ -141,7 +141,7 @@ def send_ishare_bundle(first_name: str, last_name: str, buyer, receiver: str, em
         "active": True
     })
 
-    token = user_collection.document("Active_API_BoldAssure")
+    token = bearer_token_collection.document("Active_API_BoldAssure")
     token_doc = token.get()
     token_doc_dict = token_doc.dict()
     tokennn = token_doc_dict['ishare_bearer']
@@ -220,8 +220,12 @@ def ishare_verification(batch_id):
     url = f"https://backend.boldassure.net:445/live/api/context/business/airteltigo-gh/ishare/tranx-status/{batch_id}"
 
     payload = {}
+    token = bearer_token_collection.document("Active_API_BoldAssure")
+    token_doc = token.get()
+    token_doc_dict = token_doc.dict()
+    tokennn = token_doc_dict['ishare_bearer']
     headers = {
-        'Authorization': config("BEARER_TOKEN")
+        'Authorization': tokennn
     }
 
     response = requests.request("GET", url, headers=headers, data=payload)
@@ -397,6 +401,33 @@ class WalletUserBalance(APIView):
             new_balance = previous_wallet_balance + to_be_added
             doc_ref = user_collection.document(user_id)
             doc_ref.update({'wallet': new_balance})
+            name = f"{user_details['first_name']} {user_details['last_name']}"
+            amount = converted
+            email = user_details['email']
+            file_path = 'wallet_mail.txt'
+            mail_doc_ref = mail_collection.document()
+
+            with open(file_path, 'r') as file:
+                html_content = file.read()
+
+            placeholders = {
+                '{name}': name,
+                '{amount}': amount
+            }
+
+            for placeholder, value in placeholders.items():
+                html_content = html_content.replace(placeholder, str(value))
+
+            mail_doc_ref.set({
+                'to': email,
+                'message': {
+                    'subject': 'Wallet Topup',
+                    'html': html_content,
+                    'messageId': 'Bestpay'
+                }
+            })
+
+
             sms_message = f"GHS {to_be_added} was deposited in your wallet. Available balance is now GHS {new_balance}"
             sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to=0{user_details['phone']}&from=InternetHub&sms={sms_message}"
             response = requests.request("GET", url=sms_url)
@@ -448,7 +479,10 @@ class InitiateTransaction(APIView):
                 print(code)
                 print(ishare_response)
                 if code == '200' or ishare_response == 'Crediting Successful.':
-
+                    sms = f"Hey there\nYour account has been credited with {data_volume}MB.\nTransaction Reference: {reference}"
+                    r_sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to={receiver}&from=InternetHub&sms={sms}"
+                    response = requests.request("GET", url=r_sms_url)
+                    print(response.text)
                     doc_ref = history_collection.document(date_and_time)
                     doc_ref.update({'done': 'Successful'})
                     mail_doc_ref = mail_collection.document(f"{batch_id}-Mail")
@@ -551,6 +585,7 @@ class InitiateBigTimeTransaction(APIView):
                 'uid': user_id
             }
             history_collection.document(date_and_time).set(data)
+            mtn_other.document(date_and_time).set(data)
             user = history_collection.document(date_and_time)
             doc = user.get()
             print(doc.to_dict())
@@ -661,6 +696,7 @@ class InitiateMTNTransaction(APIView):
                 'ishareBalance': 0,
                 'name': f"{first_name} {last_name}",
                 'number': receiver,
+                'buyer': phone,
                 'paid_at': date_and_time,
                 'payment_status': "success",
                 'reference': reference,
