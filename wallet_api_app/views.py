@@ -699,7 +699,7 @@ class InitiateMTNTransaction(APIView):
                 'date': date,
                 'email': email,
                 'date_and_time': date_and_time,
-                'image': "",
+                'image': email,
                 'ip_address': "",
                 'ishareBalance': 0,
                 'name': f"{first_name} {last_name}",
