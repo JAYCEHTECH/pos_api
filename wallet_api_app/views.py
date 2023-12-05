@@ -399,13 +399,16 @@ class WalletUserBalance(APIView):
         except ValueError:
             return Response({'message': "Invalid wallet balance provided"}, status=status.HTTP_400_BAD_REQUEST)
         if serializer.is_valid():
+            user_details = get_user_details(user_id)
+            first_name = user_details['first name']
+            last_name = user_details['last name']
+            email = user_details['email']
             to_be_added = float(amount)
             new_balance = previous_wallet_balance + to_be_added
             doc_ref = user_collection.document(user_id)
             doc_ref.update({'wallet': new_balance})
-            name = f"{user_details['first_name']} {user_details['last_name']}"
+            name = f"{first_name} {last_name}"
             amount = converted
-            email = user_details['email']
             file_path = 'wallet_mail.txt'
             mail_doc_ref = mail_collection.document()
 
