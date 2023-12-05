@@ -409,7 +409,7 @@ class WalletUserBalance(APIView):
             doc_ref.update({'wallet': new_balance})
             name = f"{first_name} {last_name}"
             amount = converted
-            file_path = 'wallet_mail.txt'
+            file_path = 'wallet_api_app/wallet_mail.txt'
             mail_doc_ref = mail_collection.document()
 
             with open(file_path, 'r') as file:
