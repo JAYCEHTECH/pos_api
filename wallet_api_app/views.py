@@ -697,6 +697,7 @@ class InitiateMTNTransaction(APIView):
                 'created_at': date_and_time,
                 'data_volume': data_volume,
                 'date': date,
+                'email': email,
                 'date_and_time': date_and_time,
                 'image': "",
                 'ip_address': "",
