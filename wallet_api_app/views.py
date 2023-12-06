@@ -126,32 +126,67 @@ def get_all_history():
         break
 
 
-def send_ishare_bundle(first_name: str, last_name: str, buyer, receiver: str, email: str, bundle: float):
-    print("in send bundle")
-    url = "https://backend.boldassure.net:445/live/api/context/business/transaction/new-transaction"
+def send_ishare_bundle(first_name: str, last_name: str, buyer, receiver: str, email: str, bundle: float, reference: str):
+    # print("in send bundle")
+    # url = "https://backend.boldassure.net:445/live/api/context/business/transaction/new-transaction"
+    #
+    # payload = json.dumps({
+    #     "accountNo": buyer,
+    #     "accountFirstName": first_name,
+    #     "accountLastName": last_name,
+    #     "accountMsisdn": receiver,
+    #     "accountEmail": email,
+    #     "accountVoiceBalance": 0,
+    #     "accountDataBalance": bundle,
+    #     "accountCashBalance": 0,
+    #     "active": True
+    # })
+    #
+    # token = bearer_token_collection.document("Active_API_BoldAssure")
+    # token_doc = token.get()
+    # token_doc_dict = token_doc.to_dict()
+    # tokennn = token_doc_dict['ishare_bearer']
+    #
+    # headers = {
+    #     'Authorization': tokennn,
+    #     'Content-Type': 'application/json'
+    # }
+    # print("here")
+    # session = requests.Session()
+    # retry = Retry(connect=15, backoff_factor=0.5)
+    # adapter = HTTPAdapter(max_retries=retry)
+    # session.mount('https://', adapter)
+    #
+    # response = session.post(url, headers=headers, data=payload)
+    # status_code = response.status_code
+    # print("after response")
+    #
+    # return response, status_code
 
-    payload = json.dumps({
-        "accountNo": buyer,
-        "accountFirstName": first_name,
-        "accountLastName": last_name,
-        "accountMsisdn": receiver,
-        "accountEmail": email,
-        "accountVoiceBalance": 0,
-        "accountDataBalance": bundle,
-        "accountCashBalance": 0,
-        "active": True
-    })
+    url = "https://console.bestpaygh.com/api/flexi/v1/new_transaction/"
 
     token = bearer_token_collection.document("Active_API_BoldAssure")
     token_doc = token.get()
     token_doc_dict = token_doc.to_dict()
-    tokennn = token_doc_dict['ishare_bearer']
+    key = token_doc_dict['key']
+    secret = token_doc_dict['secret']
 
     headers = {
-        'Authorization': tokennn,
+        "api-key": key,
+        "api-secret": secret,
         'Content-Type': 'application/json'
     }
-    print("here")
+
+    payload = json.dumps({
+        "first_name": first_name,
+        "last_name": last_name,
+        "account_number": buyer,
+        "receiver": receiver,
+        "account_email": email,
+        "reference": reference,
+        "bundle_amount": bundle
+    })
+
     session = requests.Session()
     retry = Retry(connect=15, backoff_factor=0.5)
     adapter = HTTPAdapter(max_retries=retry)
@@ -177,7 +212,7 @@ def send_and_save_to_history(user_id, txn_type: str, txn_status: str, paid_at: s
     ishare_response, status_code = send_ishare_bundle(first_name=first_name, last_name=last_name, receiver=receiver,
                                                       buyer=phone,
                                                       bundle=data_volume,
-                                                      email=email)
+                                                      email=email, reference=reference)
     json_response = ishare_response.json()
     print(f"hello:{json_response}")
     status_code = status_code

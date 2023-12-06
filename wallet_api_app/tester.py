@@ -1,52 +1,54 @@
+import json
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import db, firestore
+from django.conf import settings
+
 import requests
-import timeit
-
-from decouple import config
-
-# Define the base URL without parameters
-base_url = 'http://127.0.0.1:8000/initiate_flexi_transaction/'
-
-# Define parameters
-token = config('TOKEN')
-user_id = '9VA0qyq6lXYPZ6Ut867TVcBvF2t1'
-txn_type = 'MTN'
-txn_status = 'success'
-paid_at = '2023-11-27'
-channel = 'wallet'
-ishare_balance = '50'
-color_code = 'Green'  # URL encoded '#FFA500'
-data_volume = '58'
-reference = '757'
-data_break_down = 'tdt'
-amount = '5'
-receiver = '0272266444'
-date = '2023-11-27'
-image = 'image_url'
-time = '14:30:00'
-date_and_time = '2023-11-27T14:30:00'
-
-# Construct the complete URL with parameters
-url = f"{base_url}{token}/{user_id}/{txn_type}/{txn_status}/{paid_at}/{channel}/{ishare_balance}/{color_code}/{data_volume}/{reference}/{data_break_down}/{amount}/{receiver}/{date}/{image}/{time}/{date_and_time}"
-# print(url)
-# Send POST request
-response = requests.get(url)
-
-# Check response status
-if response.status_code == 200:
-    print("Request successful.")
-    print(response.text)  # If expecting a response, print it
-else:
-    print("Request failed. Status code:", response.status_code)
-
+from requests.adapters import HTTPAdapter
+from urllib3 import Retry
 #
+# if not firebase_admin._apps:
+#     cred = credentials.Certificate(settings.FIREBASE_ADMIN_CERT)
+#     firebase_admin.initialize_app(cred, {
+#         'databaseURL': 'https://bestpay-flutter-default-rtdb.firebaseio.com'
+#     })
 #
+# database = firestore.client()
 #
-# # file_path = 'wallet_api_app/mail.txt'  # Replace with your file path
-# #
-# # with open(file_path, 'r') as file:
-# #     html_content = file.read()
-# #
-# # # print(html_content)
-# # print(type(html_content))
+# bearer_token_collection = database.collection("_KeysAndBearer")
 
+url = "https://console.bestpaygh.com/api/flexi/v1/new_transaction/"
 
+# token = bearer_token_collection.document("Active_API_BoldAssure")
+# token_doc = token.get()
+# token_doc_dict = token_doc.to_dict()
+key = "YZIDF9C3G1-MJS1ZLAMTSZT9DN3YYZ19"
+secret = "M6FXA0$UBS-ACRA2FHFW$MC333$9TFU5UYK3$69UU77NOGC$NC8S53TL9O66ZR0Y"
+
+headers = {
+    "api-key": key,
+    "api-secret": secret,
+    'Content-Type': 'application/json'
+}
+
+payload = json.dumps({
+  "first_name": "Mike",
+  "last_name": "Gyamfi",
+  "account_number": "0242442147",
+  "receiver": "0272266444",
+  "account_email": "codeage20@gmail.com",
+  "reference": "lambda8",
+  "bundle_amount": 50
+})
+
+session = requests.Session()
+retry = Retry(connect=15, backoff_factor=0.5)
+adapter = HTTPAdapter(max_retries=retry)
+session.mount('https://', adapter)
+
+response = session.post(url, headers=headers, data=payload)
+status_code = response.status_code
+print("after response")
+
+print(response.json())
