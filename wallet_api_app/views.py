@@ -217,7 +217,7 @@ def send_and_save_to_history(user_id, txn_type: str, txn_status: str, paid_at: s
     print(f"hello:{json_response}")
     status_code = status_code
     print(status_code)
-    batch_id = json_response["batchId"]
+    batch_id = json_response["batch_id"]
     print(batch_id)
 
     data = {
