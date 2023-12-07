@@ -209,19 +209,8 @@ def send_and_save_to_history(user_id, txn_type: str, txn_status: str, paid_at: s
     email = user_details['email']
     phone = user_details['phone']
 
-    ishare_response, status_code = send_ishare_bundle(first_name=first_name, last_name=last_name, receiver=receiver,
-                                                      buyer=phone,
-                                                      bundle=data_volume,
-                                                      email=email, reference=reference)
-    json_response = ishare_response.json()
-    print(f"hello:{json_response}")
-    status_code = status_code
-    print(status_code)
-    batch_id = json_response["batch_id"]
-    print(batch_id)
-
     data = {
-        'batch_id': batch_id,
+        'batch_id': "unknown",
         'buyer': phone,
         'color_code': color_code,
         'amount': amount,
@@ -237,7 +226,7 @@ def send_and_save_to_history(user_id, txn_type: str, txn_status: str, paid_at: s
         'number': receiver,
         'paid_at': paid_at,
         'reference': reference,
-        'responseCode': status_code,
+        'responseCode': "0",
         'status': txn_status,
         'time': time,
         'tranxId': str(tranx_id_gen()),
@@ -246,6 +235,50 @@ def send_and_save_to_history(user_id, txn_type: str, txn_status: str, paid_at: s
     }
     history_collection.document(date_and_time).set(data)
     history_web.collection(email).document(date_and_time).set(data)
+
+    print("first save")
+
+    ishare_response, status_code = send_ishare_bundle(first_name=first_name, last_name=last_name, receiver=receiver,
+                                                      buyer=phone,
+                                                      bundle=data_volume,
+                                                      email=email, reference=reference)
+    json_response = ishare_response.json()
+    print(f"hello:{json_response}")
+    status_code = status_code
+    print(status_code)
+    batch_id = json_response["batch_id"]
+    print(batch_id)
+
+    doc_ref = history_collection.document(date_and_time)
+    doc_ref.update({'batch_id': batch_id, 'responseCode': status_code})
+    history_web.collection(email).document(date_and_time).update({'batch_id': batch_id, 'responseCode': status_code})
+    # data = {
+    #     'batch_id': batch_id,
+    #     'buyer': phone,
+    #     'color_code': color_code,
+    #     'amount': amount,
+    #     'data_break_down': data_break_down,
+    #     'data_volume': data_volume,
+    #     'date': date,
+    #     'date_and_time': date_and_time,
+    #     'done': "unknown",
+    #     'email': email,
+    #     'image': image,
+    #     'ishareBalance': ishare_balance,
+    #     'name': f"{first_name} {last_name}",
+    #     'number': receiver,
+    #     'paid_at': paid_at,
+    #     'reference': reference,
+    #     'responseCode': status_code,
+    #     'status': txn_status,
+    #     'time': time,
+    #     'tranxId': str(tranx_id_gen()),
+    #     'type': txn_type,
+    #     'uid': user_id
+    # }
+    # history_collection.document(date_and_time).set(data)
+    # history_web.collection(email).document(date_and_time).set(data)
+
     print("firebase saved")
     return status_code, batch_id if batch_id else "No batchId", email, first_name
 
