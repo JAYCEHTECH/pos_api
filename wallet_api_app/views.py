@@ -725,7 +725,7 @@ class InitiateMTNTransaction(APIView):
             print(doc.to_dict())
             tranx_id = doc.to_dict()['tranxId']
             second_data = {
-                'amount': "6",
+                'amount': amount,
                 'batch_id': "unknown",
                 'channel': channel,
                 'color_code': color_code,
