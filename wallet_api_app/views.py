@@ -556,6 +556,8 @@ class InitiateTransaction(APIView):
         print(enough_balance)
         if enough_balance:
             print(enough_balance)
+            if channel.lower() == "wallet":
+                update_user_wallet(user_id, amount)
             status_code, batch_id, email, first_name = send_and_save_to_history(user_id, txn_type, txn_status, paid_at,
                                                                                 float(ishare_balance),
                                                                                 color_code, float(data_volume),
@@ -565,8 +567,6 @@ class InitiateTransaction(APIView):
                                                                                 date, image, time, date_and_time)
             print(status_code)
             print(batch_id)
-            if channel.lower() == "wallet":
-                update_user_wallet(user_id, amount)
             sleep(10)
             ishare_verification_response = ishare_verification(batch_id)
             if ishare_verification_response is not False:
