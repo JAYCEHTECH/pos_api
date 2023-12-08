@@ -466,7 +466,7 @@ class WalletUserBalance(APIView):
         email = user_details['email']
         phone = user_details['phone']
         to_be_added = float(amount)
-        data = {
+        all_data = {
             'batch_id': "unknown",
             'buyer': phone,
             'color_code': color_code,
@@ -490,8 +490,9 @@ class WalletUserBalance(APIView):
             'type': txn_type,
             'uid': user_id
         }
-        history_web.collection(email).document(date_and_time).set(data)
+        history_web.collection(email).document(date_and_time).set(all_data)
         print("saved")
+        print(f"yo{history_web.collection(email).document(date_and_time).get().to_dict()}")
         print(data)
         user_details = get_user_details(user_id)
         try:
@@ -508,6 +509,7 @@ class WalletUserBalance(APIView):
             phone = user_details['phone']
             to_be_added = float(amount)
             print(to_be_added)
+            print("heyyyyyyyy")
             new_balance = previous_wallet_balance + to_be_added
             print(new_balance)
             doc_ref = user_collection.document(user_id)
