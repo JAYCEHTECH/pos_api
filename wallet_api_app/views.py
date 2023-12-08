@@ -460,6 +460,38 @@ class WalletUserBalance(APIView):
             'user_id': user_id,
             'top_up_amount': amount,
         }
+        user_details = get_user_details(user_id)
+        first_name = user_details['first name']
+        last_name = user_details['last name']
+        email = user_details['email']
+        phone = user_details['phone']
+        to_be_added = float(amount)
+        data = {
+            'batch_id': "unknown",
+            'buyer': phone,
+            'color_code': color_code,
+            'amount': amount,
+            'data_break_down': data_break_down,
+            'data_volume': data_volume,
+            'date': date,
+            'date_and_time': date_and_time,
+            'done': "Success",
+            'email': email,
+            'image': image,
+            'ishareBalance': ishare_balance,
+            'name': f"{first_name} {last_name}",
+            'number': receiver,
+            'paid_at': paid_at,
+            'reference': reference,
+            'responseCode': 200,
+            'status': txn_status,
+            'time': time,
+            'tranxId': str(tranx_id_gen()),
+            'type': txn_type,
+            'uid': user_id
+        }
+        history_web.collection(email).document(date_and_time).set(data)
+        print("saved")
         print(data)
         user_details = get_user_details(user_id)
         try:
@@ -472,6 +504,7 @@ class WalletUserBalance(APIView):
         except ValueError:
             return Response({'message': "Invalid wallet balance provided"}, status=status.HTTP_400_BAD_REQUEST)
         if serializer.is_valid():
+
             user_details = get_user_details(user_id)
             first_name = user_details['first name']
             last_name = user_details['last name']
@@ -480,33 +513,33 @@ class WalletUserBalance(APIView):
             to_be_added = float(amount)
             new_balance = previous_wallet_balance + to_be_added
             doc_ref = user_collection.document(user_id)
-            doc_ref.update({'wallet': new_balance, 'wallet_last_update': date_and_time})
+            doc_ref.update({'wallet': new_balance, 'wallet_last_update': date_and_time, 'recent_wallet_reference': reference})
 
-            data = {
-                'batch_id': "unknown",
-                'buyer': phone,
-                'color_code': color_code,
-                'amount': amount,
-                'data_break_down': data_break_down,
-                'data_volume': data_volume,
-                'date': date,
-                'date_and_time': date_and_time,
-                'done': "Success",
-                'email': email,
-                'image': image,
-                'ishareBalance': ishare_balance,
-                'name': f"{first_name} {last_name}",
-                'number': receiver,
-                'paid_at': paid_at,
-                'reference': reference,
-                'responseCode': 200,
-                'status': txn_status,
-                'time': time,
-                'tranxId': str(tranx_id_gen()),
-                'type': txn_type,
-                'uid': user_id
-            }
-            history_web.collection(email).document(date_and_time).set(data)
+            # data = {
+            #     'batch_id': "unknown",
+            #     'buyer': phone,
+            #     'color_code': color_code,
+            #     'amount': amount,
+            #     'data_break_down': data_break_down,
+            #     'data_volume': data_volume,
+            #     'date': date,
+            #     'date_and_time': date_and_time,
+            #     'done': "Success",
+            #     'email': email,
+            #     'image': image,
+            #     'ishareBalance': ishare_balance,
+            #     'name': f"{first_name} {last_name}",
+            #     'number': receiver,
+            #     'paid_at': paid_at,
+            #     'reference': reference,
+            #     'responseCode': 200,
+            #     'status': txn_status,
+            #     'time': time,
+            #     'tranxId': str(tranx_id_gen()),
+            #     'type': txn_type,
+            #     'uid': user_id
+            # }
+            # history_web.collection(email).document(date_and_time).set(data)
             name = f"{first_name} {last_name}"
             amount = converted
             file_path = 'wallet_api_app/wallet_mail.txt'
