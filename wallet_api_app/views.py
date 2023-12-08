@@ -848,6 +848,7 @@ class InitiateMTNTransaction(APIView):
                     'messageId': 'Bestpay'
                 }
             })
+            print("got to redirect")
             return redirect(f"https://{callback_url}")
         else:
             return Response({"code": '0001', 'message': 'Not enough balance to perform transaction'},
