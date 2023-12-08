@@ -442,10 +442,15 @@ class WalletUserBalance(APIView):
     # wallet = user_dict["wallet_balance"]
     # return Response({'code': '0000', 'wallet_balance': wallet}, status=status.HTTP_200_OK)
 
-    def get(self, request, token, user_id, amount, callback_url, *args, **kwargs):
+    def get(self, request, token, user_id, amount: str, txn_type: str, txn_status: str, paid_at: str,
+            channel: str, ishare_balance: str,
+            color_code: str,
+            data_volume: str, reference: str, data_break_down: str, receiver: str,
+            date: str, image, time: str, date_and_time: str, callback_url, *args, **kwargs):
         if token != config('TOKEN'):
             return Response(data={'message': 'Invalid Authorization Token Provided'},
                             status=status.HTTP_401_UNAUTHORIZED)
+        print("hit it")
         user_instance = self.get_object(user_id)
         if not user_instance:
             return Response({
@@ -471,10 +476,37 @@ class WalletUserBalance(APIView):
             first_name = user_details['first name']
             last_name = user_details['last name']
             email = user_details['email']
+            phone = user_details['phone']
             to_be_added = float(amount)
             new_balance = previous_wallet_balance + to_be_added
             doc_ref = user_collection.document(user_id)
-            doc_ref.update({'wallet': new_balance})
+            doc_ref.update({'wallet': new_balance, 'wallet_last_update': date_and_time})
+
+            data = {
+                'batch_id': "unknown",
+                'buyer': phone,
+                'color_code': color_code,
+                'amount': amount,
+                'data_break_down': data_break_down,
+                'data_volume': data_volume,
+                'date': date,
+                'date_and_time': date_and_time,
+                'done': "Success",
+                'email': email,
+                'image': image,
+                'ishareBalance': ishare_balance,
+                'name': f"{first_name} {last_name}",
+                'number': receiver,
+                'paid_at': paid_at,
+                'reference': reference,
+                'responseCode': 200,
+                'status': txn_status,
+                'time': time,
+                'tranxId': str(tranx_id_gen()),
+                'type': txn_type,
+                'uid': user_id
+            }
+            history_web.collection(email).document(date_and_time).set(data)
             name = f"{first_name} {last_name}"
             amount = converted
             file_path = 'wallet_api_app/wallet_mail.txt'
@@ -500,13 +532,12 @@ class WalletUserBalance(APIView):
                 }
             })
 
-
             sms_message = f"GHS {to_be_added} was deposited in your wallet. Available balance is now GHS {new_balance}"
             sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to=0{user_details['phone']}&from=InternetHub&sms={sms_message}"
             response = requests.request("GET", url=sms_url)
             print(response.status_code)
             return redirect(f"https://{callback_url}")
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return redirect(f"https://{callback_url}")
 
 
 class InitiateTransaction(APIView):
