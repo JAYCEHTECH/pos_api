@@ -514,7 +514,7 @@ class WalletUserBalance(APIView):
             new_balance = previous_wallet_balance + to_be_added
             doc_ref = user_collection.document(user_id)
             doc_ref.update({'wallet': new_balance, 'wallet_last_update': date_and_time, 'recent_wallet_reference': reference})
-
+            print(doc_ref.get().to_dict())
             # data = {
             #     'batch_id': "unknown",
             #     'buyer': phone,
