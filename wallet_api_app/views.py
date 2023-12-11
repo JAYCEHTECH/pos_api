@@ -457,7 +457,10 @@ class WalletUserBalance(APIView):
         hist = history_web.collection(email).document(date_and_time)
         doc = hist.get()
         if doc.exists:
+            print(doc)
             return redirect(f"https://{callback_url}")
+        else:
+            print("no record found")
         if not user_instance:
             return Response({
                 "message": "User does not exist"
@@ -599,6 +602,8 @@ class InitiateTransaction(APIView):
             doc = hist.get()
             if doc.exists:
                 return redirect(f"https://{callback_url}")
+            else:
+                print("no record found")
             print(enough_balance)
             if channel.lower() == "wallet":
                 update_user_wallet(user_id, amount)
@@ -709,6 +714,8 @@ class InitiateBigTimeTransaction(APIView):
             doc = hist.get()
             if doc.exists:
                 return redirect(f"https://{callback_url}")
+            else:
+                print("no record found")
             if channel.lower() == "wallet":
                 print("updated")
                 update_user_wallet(user_id, amount)
@@ -805,6 +812,8 @@ class InitiateMTNTransaction(APIView):
             doc = hist.get()
             if doc.exists:
                 return redirect(f"https://{callback_url}")
+            else:
+                print("no record found")
             if channel.lower() == "wallet":
                 print("updated")
                 update_user_wallet(user_id, amount)
