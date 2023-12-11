@@ -454,13 +454,6 @@ class WalletUserBalance(APIView):
         user_details = get_user_details(user_id)
         email = user_details['email']
         user_instance = self.get_object(user_id)
-        hist = history_web.collection(email).document(date_and_time)
-        doc = hist.get()
-        if doc.exists:
-            print(doc)
-            return redirect(f"https://{callback_url}")
-        else:
-            print("no record found")
         if not user_instance:
             return Response({
                 "message": "User does not exist"
@@ -598,12 +591,6 @@ class InitiateTransaction(APIView):
         if enough_balance:
             user_details = get_user_details(user_id)
             email = user_details['email']
-            hist = history_web.collection(email).document(date_and_time)
-            doc = hist.get()
-            if doc.exists:
-                return redirect(f"https://{callback_url}")
-            else:
-                print("no record found")
             print(enough_balance)
             if channel.lower() == "wallet":
                 update_user_wallet(user_id, amount)
@@ -710,12 +697,6 @@ class InitiateBigTimeTransaction(APIView):
             last_name = user_details['last name']
             email = user_details['email']
             phone = user_details['phone']
-            hist = history_web.collection(email).document(date_and_time)
-            doc = hist.get()
-            if doc.exists:
-                return redirect(f"https://{callback_url}")
-            else:
-                print("no record found")
             if channel.lower() == "wallet":
                 print("updated")
                 update_user_wallet(user_id, amount)
@@ -808,12 +789,6 @@ class InitiateMTNTransaction(APIView):
             last_name = user_details['last name']
             email = user_details['email']
             phone = user_details['phone']
-            hist = history_web.collection(email).document(date_and_time)
-            doc = hist.get()
-            if doc.exists:
-                return redirect(f"https://{callback_url}")
-            else:
-                print("no record found")
             if channel.lower() == "wallet":
                 print("updated")
                 update_user_wallet(user_id, amount)
