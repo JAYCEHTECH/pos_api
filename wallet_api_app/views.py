@@ -451,7 +451,13 @@ class WalletUserBalance(APIView):
             return Response(data={'message': 'Invalid Authorization Token Provided'},
                             status=status.HTTP_401_UNAUTHORIZED)
         print("hit it")
+        user_details = get_user_details(user_id)
+        email = user_details['email']
         user_instance = self.get_object(user_id)
+        hist = history_web.collection(email).document(date_and_time)
+        doc = hist.get()
+        if doc.exists:
+            return redirect(f"https://{callback_url}")
         if not user_instance:
             return Response({
                 "message": "User does not exist"
@@ -463,7 +469,6 @@ class WalletUserBalance(APIView):
         user_details = get_user_details(user_id)
         first_name = user_details['first name']
         last_name = user_details['last name']
-        email = user_details['email']
         phone = user_details['phone']
         to_be_added = float(amount)
         all_data = {
@@ -588,6 +593,12 @@ class InitiateTransaction(APIView):
             enough_balance = True
         print(enough_balance)
         if enough_balance:
+            user_details = get_user_details(user_id)
+            email = user_details['email']
+            hist = history_web.collection(email).document(date_and_time)
+            doc = hist.get()
+            if doc.exists:
+                return redirect(f"https://{callback_url}")
             print(enough_balance)
             if channel.lower() == "wallet":
                 update_user_wallet(user_id, amount)
@@ -694,6 +705,10 @@ class InitiateBigTimeTransaction(APIView):
             last_name = user_details['last name']
             email = user_details['email']
             phone = user_details['phone']
+            hist = history_web.collection(email).document(date_and_time)
+            doc = hist.get()
+            if doc.exists:
+                return redirect(f"https://{callback_url}")
             if channel.lower() == "wallet":
                 print("updated")
                 update_user_wallet(user_id, amount)
@@ -786,6 +801,10 @@ class InitiateMTNTransaction(APIView):
             last_name = user_details['last name']
             email = user_details['email']
             phone = user_details['phone']
+            hist = history_web.collection(email).document(date_and_time)
+            doc = hist.get()
+            if doc.exists:
+                return redirect(f"https://{callback_url}")
             if channel.lower() == "wallet":
                 print("updated")
                 update_user_wallet(user_id, amount)
