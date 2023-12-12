@@ -454,6 +454,13 @@ class WalletUserBalance(APIView):
         user_details = get_user_details(user_id)
         email = user_details['email']
         user_instance = self.get_object(user_id)
+        hist = history_web.collection(email).document(date_and_time)
+        doc = hist.get()
+        if doc.exists:
+            print(doc)
+            return redirect(f"https://{callback_url}")
+        else:
+            print("no record found")
         if not user_instance:
             return Response({
                 "message": "User does not exist"
@@ -592,6 +599,12 @@ class InitiateTransaction(APIView):
             user_details = get_user_details(user_id)
             email = user_details['email']
             print(enough_balance)
+            hist = history_web.collection(email).document(date_and_time)
+            doc = hist.get()
+            if doc.exists:
+                return redirect(f"https://{callback_url}")
+            else:
+                print("no record found")
             if channel.lower() == "wallet":
                 update_user_wallet(user_id, amount)
             status_code, batch_id, email, first_name = send_and_save_to_history(user_id, txn_type, txn_status, paid_at,
@@ -697,6 +710,13 @@ class InitiateBigTimeTransaction(APIView):
             last_name = user_details['last name']
             email = user_details['email']
             phone = user_details['phone']
+            hist = history_web.collection(email).document(date_and_time)
+            doc = hist.get()
+            if doc.exists:
+                print(doc)
+                return redirect(f"https://{callback_url}")
+            else:
+                print("no record found")
             if channel.lower() == "wallet":
                 print("updated")
                 update_user_wallet(user_id, amount)
@@ -789,9 +809,17 @@ class InitiateMTNTransaction(APIView):
             last_name = user_details['last name']
             email = user_details['email']
             phone = user_details['phone']
+            hist = history_web.collection(email).document(date_and_time)
+            doc = hist.get()
+            if doc.exists:
+                print(doc)
+                return redirect(f"https://{callback_url}")
+            else:
+                print("no record found")
             if channel.lower() == "wallet":
                 print("updated")
                 update_user_wallet(user_id, amount)
+
             data = {
                 'batch_id': "unknown",
                 'buyer': phone,
