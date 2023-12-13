@@ -610,6 +610,7 @@ class InitiateTransaction(APIView):
                 if user is None:
                     return None
                 user_wallet = user['wallet']
+                print(f"previous wallet: {user_wallet}")
                 new_balance = float(user_wallet) - float(amount)
                 print(f"new_balance:{new_balance}")
                 print(user_wallet)
