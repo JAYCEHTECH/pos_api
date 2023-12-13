@@ -606,7 +606,18 @@ class InitiateTransaction(APIView):
             # else:
             #     print("no record found")
             if channel.lower() == "wallet":
-                update_user_wallet(user_id, amount)
+                user = get_user_details(user_id)
+                if user is None:
+                    return None
+                user_wallet = user['wallet']
+                new_balance = float(user_wallet) - float(amount)
+                print(f"new_balance:{new_balance}")
+                print(user_wallet)
+                doc_ref = user_collection.document(user_id)
+                doc_ref.update({'wallet': new_balance})
+                user = get_user_details(user_id)
+                user_wallet = user['wallet']
+                print(f"new_user_wallet: {user_wallet}")
             status_code, batch_id, email, first_name = send_and_save_to_history(user_id, txn_type, txn_status, paid_at,
                                                                                 float(ishare_balance),
                                                                                 color_code, float(data_volume),
@@ -719,7 +730,18 @@ class InitiateBigTimeTransaction(APIView):
             #     print("no record found")
             if channel.lower() == "wallet":
                 print("updated")
-                update_user_wallet(user_id, amount)
+                user = get_user_details(user_id)
+                if user is None:
+                    return None
+                user_wallet = user['wallet']
+                new_balance = float(user_wallet) - float(amount)
+                print(f"new_balance:{new_balance}")
+                print(user_wallet)
+                doc_ref = user_collection.document(user_id)
+                doc_ref.update({'wallet': new_balance})
+                user = get_user_details(user_id)
+                user_wallet = user['wallet']
+                print(f"new_user_wallet: {user_wallet}")
             data = {
                 'batch_id': "unknown",
                 'buyer': phone,
@@ -818,7 +840,18 @@ class InitiateMTNTransaction(APIView):
             #     print("no record found")
             if channel.lower() == "wallet":
                 print("updated")
-                update_user_wallet(user_id, amount)
+                user = get_user_details(user_id)
+                if user is None:
+                    return None
+                user_wallet = user['wallet']
+                new_balance = float(user_wallet) - float(amount)
+                print(f"new_balance:{new_balance}")
+                print(user_wallet)
+                doc_ref = user_collection.document(user_id)
+                doc_ref.update({'wallet': new_balance})
+                user = get_user_details(user_id)
+                user_wallet = user['wallet']
+                print(f"new_user_wallet: {user_wallet}")
 
             data = {
                 'batch_id': "unknown",
