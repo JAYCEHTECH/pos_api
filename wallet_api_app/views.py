@@ -594,6 +594,7 @@ class InitiateTransaction(APIView):
             enough_balance = check_user_balance_against_price(user_id, amount)
         else:
             enough_balance = True
+            print("not wallet")
         print(enough_balance)
         if enough_balance:
             user_details = get_user_details(user_id)
