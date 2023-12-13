@@ -610,16 +610,19 @@ class InitiateTransaction(APIView):
                 user = get_user_details(user_id)
                 if user is None:
                     return None
-                user_wallet = user['wallet']
-                print(f"previous wallet: {user_wallet}")
-                new_balance = float(user_wallet) - float(amount)
+                previous_user_wallet = user['wallet']
+                print(f"previous wallet: {previous_user_wallet}")
+                new_balance = float(previous_user_wallet) - float(amount)
                 print(f"new_balance:{new_balance}")
-                print(user_wallet)
                 doc_ref = user_collection.document(user_id)
                 doc_ref.update({'wallet': new_balance})
                 user = get_user_details(user_id)
-                user_wallet = user['wallet']
-                print(f"new_user_wallet: {user_wallet}")
+                new_user_wallet = user['wallet']
+                print(f"new_user_wallet: {new_user_wallet}")
+                if new_user_wallet == previous_user_wallet:
+                    update_user_wallet(user_id, amount)
+                else:
+                    print("it's fine")
             status_code, batch_id, email, first_name = send_and_save_to_history(user_id, txn_type, txn_status, paid_at,
                                                                                 float(ishare_balance),
                                                                                 color_code, float(data_volume),
@@ -735,15 +738,19 @@ class InitiateBigTimeTransaction(APIView):
                 user = get_user_details(user_id)
                 if user is None:
                     return None
-                user_wallet = user['wallet']
-                new_balance = float(user_wallet) - float(amount)
+                previous_user_wallet = user['wallet']
+                print(f"previous wallet: {previous_user_wallet}")
+                new_balance = float(previous_user_wallet) - float(amount)
                 print(f"new_balance:{new_balance}")
-                print(user_wallet)
                 doc_ref = user_collection.document(user_id)
                 doc_ref.update({'wallet': new_balance})
                 user = get_user_details(user_id)
-                user_wallet = user['wallet']
-                print(f"new_user_wallet: {user_wallet}")
+                new_user_wallet = user['wallet']
+                print(f"new_user_wallet: {new_user_wallet}")
+                if new_user_wallet == previous_user_wallet:
+                    update_user_wallet(user_id, amount)
+                else:
+                    print("it's fine")
             data = {
                 'batch_id': "unknown",
                 'buyer': phone,
@@ -846,16 +853,19 @@ class InitiateMTNTransaction(APIView):
                 user = get_user_details(user_id)
                 if user is None:
                     return None
-                user_wallet = user['wallet']
-                print(f"previous balance: {user_wallet}")
-                new_balance = float(user_wallet) - float(amount)
+                previous_user_wallet = user['wallet']
+                print(f"previous wallet: {previous_user_wallet}")
+                new_balance = float(previous_user_wallet) - float(amount)
                 print(f"new_balance:{new_balance}")
-                print(user_wallet)
                 doc_ref = user_collection.document(user_id)
                 doc_ref.update({'wallet': new_balance})
                 user = get_user_details(user_id)
-                user_wallet = user['wallet']
-                print(f"new_user_wallet: {user_wallet}")
+                new_user_wallet = user['wallet']
+                print(f"new_user_wallet: {new_user_wallet}")
+                if new_user_wallet == previous_user_wallet:
+                    update_user_wallet(user_id, amount)
+                else:
+                    print("it's fine")
 
             data = {
                 'batch_id': "unknown",
