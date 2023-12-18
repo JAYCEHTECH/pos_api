@@ -500,7 +500,7 @@ class WalletUserBalance(APIView):
         }
         history_web.collection(email).document(date_and_time).set(all_data)
         print("saved")
-        history_collection.document(date_and_time).set(data)
+        history_collection.document(date_and_time).set(all_data)
         print(f"ya{history_collection.document(date_and_time).get().to_dict()}")
         print("saved")
         print(f"yo{history_web.collection(email).document(date_and_time).get().to_dict()}")
