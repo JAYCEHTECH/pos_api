@@ -41,7 +41,6 @@ bearer_token_collection = database.collection("_KeysAndBearer")
 history_web = database.collection(u'History Web').document('all_users')
 
 
-
 # all_users = [{**user.to_dict(), "id": user.id} for user in user_collection]
 # print(all_users)
 # user1 = user_collection.document('B2Ruk9G9b0ZX8mvluBUL3jKOCuA3')
@@ -126,7 +125,8 @@ def get_all_history():
         break
 
 
-def send_ishare_bundle(first_name: str, last_name: str, buyer, receiver: str, email: str, bundle: float, reference: str):
+def send_ishare_bundle(first_name: str, last_name: str, buyer, receiver: str, email: str, bundle: float,
+                       reference: str):
     # print("in send bundle")
     # url = "https://backend.boldassure.net:445/live/api/context/business/transaction/new-transaction"
     #
@@ -524,7 +524,8 @@ class WalletUserBalance(APIView):
             new_balance = previous_wallet_balance + to_be_added
             print(new_balance)
             doc_ref = user_collection.document(user_id)
-            doc_ref.update({'wallet': new_balance, 'wallet_last_update': date_and_time, 'recent_wallet_reference': reference})
+            doc_ref.update(
+                {'wallet': new_balance, 'wallet_last_update': date_and_time, 'recent_wallet_reference': reference})
             print(doc_ref.get().to_dict())
             # data = {
             #     'batch_id': "unknown",
@@ -662,7 +663,7 @@ class InitiateTransaction(APIView):
                 print(code)
                 print(ishare_response)
                 if code == '200' or ishare_response == 'Crediting Successful.':
-                    sms = f"Hey there\nYour account has been credited with {data_volume}MB.\nTransaction Reference: {reference}"
+                    sms = f"Hey there\nYour account has been credited with {data_volume}MB.\nConfirm your new balance using the AT Mobile App"
                     r_sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to={receiver}&from=InternetHub&sms={sms}"
                     response = requests.request("GET", url=r_sms_url)
                     print(response.text)
@@ -928,7 +929,6 @@ class InitiateMTNTransaction(APIView):
                 'uid': user_id
             }
 
-
             history_collection.document(date_and_time).set(data)
             history_web.collection(email).document(date_and_time).set(data)
             user = history_collection.document(date_and_time)
@@ -1000,3 +1000,189 @@ class InitiateMTNTransaction(APIView):
         else:
             return Response({"code": '0001', 'message': 'Not enough balance to perform transaction'},
                             status=status.HTTP_200_OK)
+
+
+# ============================================================================================================================
+
+class MTNFlexiInitiate(APIView):
+    def post(self, request):
+        token = request.headers.get('Authorization')
+        required_params = ['user_id', 'receiver', 'reference', 'data_volume', 'amount', 'channel']
+
+        # Check if the token matches the one in the environment variable
+        if token != "HelloWorld":
+            # Token matches, allow access
+            return Response({'code': '0001', 'message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            request_data = request.data
+            data = {
+                "user_id": request.data.get('user_id'),
+                "receiver": request.data.get('receiver'),
+                "data_volume": request.data.get('data_volume'),
+                "reference": request.data.get('reference'),
+                "amount": request.data.get('amount'),
+                "channel": request.data.get('channel'),
+            }
+
+            missing_params = [param for param in required_params if param not in request_data]
+
+            if missing_params:
+                # If any required parameter is missing, return an error response
+                return Response({'code': '0001', 'message': f'Missing parameters: {", ".join(missing_params)}'},
+                                status=status.HTTP_400_BAD_REQUEST)
+            else:
+                user_id = data['user_id']
+                receiver = data['receiver']
+                data_volume = data['data_volume']
+                reference = data['reference']
+                amount = data['amount']
+                channel = data['channel']
+
+                if data['channel'].lower() == "wallet":
+                    print("used this")
+                    enough_balance = check_user_balance_against_price(data['user_id'], data['amount'])
+                else:
+                    enough_balance = True
+                    print("not wallet")
+                print(enough_balance)
+                if enough_balance:
+                    user_details = get_user_details(data['user_id'])
+                    first_name = user_details['first name']
+                    last_name = user_details['last name']
+                    email = user_details['email']
+                    phone = user_details['phone']
+                    # hist = history_web.collection(email).document(date_and_time)
+                    # doc = hist.get()
+                    # if doc.exists:
+                    #     print(doc)
+                    #     return redirect(f"https://{callback_url}")
+                    # else:
+                    #     print("no record found")
+                    if channel.lower() == "wallet":
+                        print("updated")
+                        user = get_user_details(user_id)
+                        if user is None:
+                            return None
+                        previous_user_wallet = user['wallet']
+                        print(f"previous wallet: {previous_user_wallet}")
+                        new_balance = float(previous_user_wallet) - float(amount)
+                        print(f"new_balance:{new_balance}")
+                        doc_ref = user_collection.document(user_id)
+                        doc_ref.update({'wallet': new_balance})
+                        user = get_user_details(user_id)
+                        new_user_wallet = user['wallet']
+                        print(f"new_user_wallet: {new_user_wallet}")
+                        if new_user_wallet == previous_user_wallet:
+                            user = get_user_details(user_id)
+                            if user is None:
+                                return None
+                            previous_user_wallet = user['wallet']
+                            print(f"previous wallet: {previous_user_wallet}")
+                            new_balance = float(previous_user_wallet) - float(amount)
+                            print(f"new_balance:{new_balance}")
+                            doc_ref = user_collection.document(user_id)
+                            doc_ref.update({'wallet': new_balance})
+                            user = get_user_details(user_id)
+                            new_user_wallet = user['wallet']
+                            print(f"new_user_wallet: {new_user_wallet}")
+                        else:
+                            print("it's fine")
+
+                    date_and_time = str(datetime.datetime.now())
+
+                    data = {
+                        'batch_id': "unknown",
+                        'buyer': phone,
+                        'color_code': "Green",
+                        'amount': amount,
+                        'data_break_down': data_volume,
+                        'data_volume': data_volume,
+                        'date': str(datetime.datetime.now().date()),
+                        'date_and_time': str(datetime.datetime.now()),
+                        'done': "unknown",
+                        'email': email,
+                        'image': user_id,
+                        'ishareBalance': '',
+                        'name': f"{first_name} {last_name}",
+                        'number': receiver,
+                        'paid_at': str(datetime.datetime.now()),
+                        'reference': reference,
+                        'responseCode': 200,
+                        'status': "Saved",
+                        'time': str(datetime.datetime.now().time()),
+                        'tranxId': str(tranx_id_gen()),
+                        'type': "MTN Flexi",
+                        'uid': user_id
+                    }
+
+                    history_collection.document(date_and_time).set(data)
+                    history_web.collection(email).document(date_and_time).set(data)
+                    user = history_collection.document(date_and_time)
+                    doc = user.get()
+                    print(doc.to_dict())
+                    tranx_id = doc.to_dict()['tranxId']
+                    second_data = {
+                        'amount': amount,
+                        'batch_id': "unknown",
+                        'channel': channel,
+                        'color_code': "Green",
+                        'created_at': date_and_time,
+                        'data_volume': data_volume,
+                        'date': str(datetime.datetime.now().date()),
+                        'email': email,
+                        'date_and_time': date_and_time,
+                        'image': user_id,
+                        'ip_address': "",
+                        'ishareBalance': 0,
+                        'name': f"{first_name} {last_name}",
+                        'number': receiver,
+                        'buyer': phone,
+                        'paid_at': date_and_time,
+                        'payment_status': "success",
+                        'reference': reference,
+                        'status': "Completed",
+                        'time': str(datetime.datetime.now().time()),
+                        'tranxId': tranx_id,
+                        'type': "MTN Other Data"
+                    }
+                    mtn_other.document(date_and_time).set(second_data)
+                    user22 = mtn_other.document(date_and_time)
+                    pu = user22.get()
+                    print(pu.to_dict())
+                    print("pu")
+                    mail_doc_ref = mail_collection.document()
+                    file_path = 'wallet_api_app/mtn_maill.txt'  # Replace with your file path
+
+                    name = first_name
+                    volume = data_volume
+                    date = date_and_time
+                    reference_t = reference
+                    receiver_t = receiver
+
+                    with open(file_path, 'r') as file:
+                        html_content = file.read()
+
+                    placeholders = {
+                        '{name}': name,
+                        '{volume}': volume,
+                        '{date}': date,
+                        '{reference}': reference_t,
+                        '{receiver}': receiver_t
+                    }
+
+                    for placeholder, value in placeholders.items():
+                        html_content = html_content.replace(placeholder, str(value))
+
+                    mail_doc_ref.set({
+                        'to': email,
+                        'message': {
+                            'subject': 'MTN Data',
+                            'html': html_content,
+                            'messageId': 'Bestpay'
+                        }
+                    })
+                    print("got to redirect")
+                    return Response(data={"code": "0000", "message": "Transaction saved"}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"code": '0001', 'message': 'Not enough balance to perform transaction'},
+                                    status=status.HTTP_400_BAD_REQUEST)

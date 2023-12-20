@@ -15,4 +15,7 @@ urlpatterns = [
     path(
         'initiate_mtn_transaction/<str:token>/<str:user_id>/<str:txn_type>/<str:txn_status>/<str:paid_at>/<str:channel>/<str:ishare_balance>/<str:color_code>/<str:data_volume>/<str:reference>/<str:data_break_down>/<str:amount>/<str:receiver>/<str:date>/<str:image>/<str:time>/<str:date_and_time>/<str:callback_url>/',
         views.InitiateMTNTransaction.as_view()),
+
+
+    path('api/v1/initiate_mtn_transaction', views.MTNFlexiInitiate.as_view())
 ]

@@ -68,8 +68,8 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [  # Replace with your allowed domain(s)
     'https://test.bestpaygh.com',
     'https://www.bestpaygh.com',
-    'https://www.bestpaygh.com/',
-    'https://console.bestpaygh.com'
+    'https://www.bestpaygh.com',
+    'https://console.bestpaygh.com',
     'https://posapi.bestpaygh.com'
 ]
 
