@@ -137,6 +137,8 @@ def send_ishare_bundle(first_name: str, last_name: str, buyer, receiver: str, em
     token_doc_dict = token_doc.to_dict()
     key = token_doc_dict['key']
     secret = token_doc_dict['secret']
+    print(key)
+    print(secret)
 
     headers = {
         "api-key": key,
@@ -153,6 +155,8 @@ def send_ishare_bundle(first_name: str, last_name: str, buyer, receiver: str, em
         "reference": reference,
         "bundle_amount": bundle
     })
+
+    print(payload)
 
     session = requests.Session()
     retry = Retry(connect=15, backoff_factor=0.5)
