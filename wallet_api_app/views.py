@@ -1435,7 +1435,7 @@ def paystack_webhook(request):
                                                                      color_code="Green", data_volume=bundle_package,
                                                                      ishare_balance=0)
                     data = send_response.data
-                    json_response = data.json()
+                    json_response = data
                     print(json_response)
                     print(send_response.status_code)
                     batch_id = json_response["batch_id"]
