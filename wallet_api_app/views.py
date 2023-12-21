@@ -9,6 +9,7 @@ import requests
 from decouple import config
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
+from django.views.decorators.csrf import csrf_exempt
 from requests.adapters import HTTPAdapter
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -1383,6 +1384,7 @@ def big_time_transaction(receiver, date, time, date_and_time, phone, amount, dat
     return Response(data={'code': '0000', 'message': "Transaction Saved"}, status=status.HTTP_200_OK)
 
 
+@csrf_exempt
 def paystack_webhook(request):
     if request.method == "POST":
         paystack_secret_key = config("PAYSTACK_SECRET_KEY")
