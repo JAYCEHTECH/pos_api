@@ -17,5 +17,6 @@ urlpatterns = [
         views.InitiateMTNTransaction.as_view()),
 
 
-    path('api/v1/initiate_mtn_transaction', views.MTNFlexiInitiate.as_view())
+    path('api/v1/initiate_mtn_transaction', views.MTNFlexiInitiate.as_view()),
+    path('paystack_webhook', views.paystack_webhook, name='paystack_webhook'),
 ]

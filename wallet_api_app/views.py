@@ -1,4 +1,6 @@
 import datetime
+import hashlib
+import hmac
 import json
 import random
 from time import sleep
@@ -127,42 +129,6 @@ def get_all_history():
 
 def send_ishare_bundle(first_name: str, last_name: str, buyer, receiver: str, email: str, bundle: float,
                        reference: str):
-    # print("in send bundle")
-    # url = "https://backend.boldassure.net:445/live/api/context/business/transaction/new-transaction"
-    #
-    # payload = json.dumps({
-    #     "accountNo": buyer,
-    #     "accountFirstName": first_name,
-    #     "accountLastName": last_name,
-    #     "accountMsisdn": receiver,
-    #     "accountEmail": email,
-    #     "accountVoiceBalance": 0,
-    #     "accountDataBalance": bundle,
-    #     "accountCashBalance": 0,
-    #     "active": True
-    # })
-    #
-    # token = bearer_token_collection.document("Active_API_BoldAssure")
-    # token_doc = token.get()
-    # token_doc_dict = token_doc.to_dict()
-    # tokennn = token_doc_dict['ishare_bearer']
-    #
-    # headers = {
-    #     'Authorization': tokennn,
-    #     'Content-Type': 'application/json'
-    # }
-    # print("here")
-    # session = requests.Session()
-    # retry = Retry(connect=15, backoff_factor=0.5)
-    # adapter = HTTPAdapter(max_retries=retry)
-    # session.mount('https://', adapter)
-    #
-    # response = session.post(url, headers=headers, data=payload)
-    # status_code = response.status_code
-    # print("after response")
-    #
-    # return response, status_code
-
     url = "https://console.bestpaygh.com/api/flexi/v1/new_transaction/"
 
     token = bearer_token_collection.document("Active_API_BoldAssure")
@@ -1186,3 +1152,383 @@ class MTNFlexiInitiate(APIView):
                 else:
                     return Response({"code": '0001', 'message': 'Not enough balance to perform transaction'},
                                     status=status.HTTP_400_BAD_REQUEST)
+
+
+# ****************************************************************************************************
+# ****************************************************************************************************
+
+def webhook_send_and_save_to_history(user_id, txn_type: str, paid_at: str, ishare_balance: float,
+                                     color_code: str,
+                                     data_volume: float, reference: str, amount: float,
+                                     receiver: str,
+                                     date: str, time: str, date_and_time: str):
+    user_details = get_user_details(user_id)
+    first_name = user_details['first name']
+    last_name = user_details['last name']
+    email = user_details['email']
+    phone = user_details['phone']
+
+    data = {
+        'batch_id': "unknown",
+        'buyer': phone,
+        'color_code': color_code,
+        'amount': amount,
+        'data_break_down': str(data_volume),
+        'data_volume': data_volume,
+        'date': date,
+        'date_and_time': date_and_time,
+        'done': "Pending",
+        'email': email,
+        'image': user_id,
+        'ishareBalance': ishare_balance,
+        'name': f"{first_name} {last_name}",
+        'number': receiver,
+        'paid_at': paid_at,
+        'reference': reference,
+        'responseCode': "0",
+        'status': "Pending",
+        'time': time,
+        'tranxId': str(tranx_id_gen()),
+        'type': txn_type,
+        'uid': user_id
+    }
+    history_collection.document(date_and_time).set(data)
+    history_web.collection(email).document(date_and_time).set(data)
+
+    print("first save")
+
+    ishare_response, status_code = send_ishare_bundle(first_name=first_name, last_name=last_name, receiver=receiver,
+                                                      buyer=phone,
+                                                      bundle=data_volume,
+                                                      email=email, reference=reference)
+    json_response = ishare_response.json()
+    print(f"hello:{json_response}")
+    status_code = status_code
+    print(status_code)
+    batch_id = json_response["batch_id"]
+    print(batch_id)
+
+    doc_ref = history_collection.document(date_and_time)
+    doc_ref.update({'batch_id': batch_id, 'responseCode': status_code})
+    history_web.collection(email).document(date_and_time).update({'batch_id': batch_id, 'responseCode': status_code})
+
+    print("firebase saved")
+    # return status_code, batch_id if batch_id else "No batchId", email, first_name
+    return Response(
+        data={'status_code': status_code, 'batch_id': batch_id, 'email': email, 'first_name': first_name},
+        status=status.HTTP_200_OK)
+
+
+def mtn_flexi_transaction(receiver, date, time, date_and_time, phone, amount, data_volume, details: dict, ref,
+                          channel):
+    data = {
+        'batch_id': "unknown",
+        'buyer': phone,
+        'color_code': "Green",
+        'amount': amount,
+        'data_break_down': str(data_volume),
+        'data_volume': data_volume,
+        'date': date,
+        'date_and_time': date_and_time,
+        'done': "unknown",
+        'email': details["email"],
+        'image': details["user_id"],
+        'ishareBalance': 0,
+        'name': f"{details['first_name']} {details['last_name']}",
+        'number': receiver,
+        'paid_at': date_and_time,
+        'reference': ref,
+        'responseCode': 200,
+        'status': "Success",
+        'time': time,
+        'tranxId': str(tranx_id_gen()),
+        'type': "MTNFlexi",
+        'uid': details["user_id"]
+    }
+
+    history_collection.document(date_and_time).set(data)
+    history_web.collection(details['email']).document(date_and_time).set(data)
+    user = history_collection.document(date_and_time)
+    doc = user.get()
+    print(doc.to_dict())
+    tranx_id = doc.to_dict()['tranxId']
+    second_data = {
+        'amount': amount,
+        'batch_id': "unknown",
+        'channel': channel,
+        'color_code': "Green",
+        'created_at': date_and_time,
+        'data_volume': data_volume,
+        'date': date,
+        'email': details["email"],
+        'date_and_time': date_and_time,
+        'image': details["user_id"],
+        'ip_address': "",
+        'ishareBalance': 0,
+        'name': f"{details['first_name']} {details['last_name']}",
+        'number': receiver,
+        'buyer': phone,
+        'paid_at': date_and_time,
+        'payment_status': "success",
+        'reference': ref,
+        'status': "Completed",
+        'time': time,
+        'tranxId': tranx_id,
+        'type': "MTN Other Data"
+    }
+    mtn_other.document(date_and_time).set(second_data)
+    user22 = mtn_other.document(date_and_time)
+    pu = user22.get()
+    print(pu.to_dict())
+    print("pu")
+    mail_doc_ref = mail_collection.document()
+    file_path = 'wallet_api_app/mtn_maill.txt'  # Replace with your file path
+
+    name = details['first_name']
+    volume = data_volume
+    date = date_and_time
+    reference_t = ref
+    receiver_t = receiver
+
+    with open(file_path, 'r') as file:
+        html_content = file.read()
+
+    placeholders = {
+        '{name}': name,
+        '{volume}': volume,
+        '{date}': date,
+        '{reference}': reference_t,
+        '{receiver}': receiver_t
+    }
+
+    for placeholder, value in placeholders.items():
+        html_content = html_content.replace(placeholder, str(value))
+
+    mail_doc_ref.set({
+        'to': details['email'],
+        'message': {
+            'subject': 'MTN Data',
+            'html': html_content,
+            'messageId': 'Bestpay'
+        }
+    })
+    print("got to redirect")
+    return Response(data={'code': '0000', 'message': "Transaction Saved"}, status=status.HTTP_200_OK)
+
+
+def big_time_transaction(receiver, date, time, date_and_time, phone, amount, data_volume, details: dict, ref,
+                         channel):
+    data = {
+        'batch_id': "unknown",
+        'buyer': phone,
+        'color_code': "Green",
+        'amount': amount,
+        'data_break_down': str(data_volume),
+        'data_volume': data_volume,
+        'date': date,
+        'date_and_time': date_and_time,
+        'done': "unknown",
+        'email': details['email'],
+        'image': details['user_id'],
+        'ishareBalance': 0,
+        'name': f"{details['first_name']} {details['last_name']}",
+        'number': receiver,
+        'paid_at': str(date_and_time),
+        'reference': ref,
+        'responseCode': 200,
+        'status': "Success",
+        'time': time,
+        'tranxId': str(tranx_id_gen()),
+        'type': "BigTime",
+        'uid': details['user_id']
+    }
+    history_collection.document(date_and_time).set(data)
+    history_web.collection(details['email']).document(date_and_time).set(data)
+    mtn_other.document(date_and_time).set(data)
+    user = history_collection.document(date_and_time)
+    doc = user.get()
+    print(doc.to_dict())
+    tranx_id = doc.to_dict()['tranxId']
+    mail_doc_ref = mail_collection.document()
+    file_path = 'wallet_api_app/mtn_mail.txt'  # Replace with your file path
+
+    name = details['first_name']
+    volume = data_volume
+    date = date_and_time
+    reference_t = ref
+    receiver_t = receiver
+
+    with open(file_path, 'r') as file:
+        html_content = file.read()
+
+    placeholders = {
+        '{name}': name,
+        '{volume}': volume,
+        '{date}': date,
+        '{reference}': reference_t,
+        '{receiver}': receiver_t
+    }
+
+    for placeholder, value in placeholders.items():
+        html_content = html_content.replace(placeholder, str(value))
+
+    mail_doc_ref.set({
+        'to': details['email'],
+        'message': {
+            'subject': 'Big Time Data',
+            'html': html_content,
+            'messageId': 'Bestpay'
+        }
+    })
+    return Response(data={'code': '0000', 'message': "Transaction Saved"}, status=status.HTTP_200_OK)
+
+
+def paystack_webhook(request):
+    if request.method == "POST":
+        paystack_secret_key = config("PAYSTACK_SECRET_KEY")
+        payload = json.loads(request.body)
+
+        paystack_signature = request.headers.get("X-Paystack-Signature")
+
+        if not paystack_secret_key or not paystack_signature:
+            return HttpResponse(status=400)
+
+        computed_signature = hmac.new(
+            paystack_secret_key.encode('utf-8'),
+            request.body,
+            hashlib.sha512
+        ).hexdigest()
+
+        if computed_signature == paystack_signature:
+            print(payload)
+            if payload.get('event') == 'charge.success':
+                receiver = payload.get('receiver')
+                bundle_package = payload.get('bundle_package')
+                channel = payload.get('channel')
+                user_id = payload.get('user_id')
+                amount = payload.get('amount')
+                email = payload.get('email')
+                reference = payload.get('reference')
+                date = str(datetime.datetime.now().date())
+                time = str(datetime.datetime.now().time())
+                date_and_time = str(datetime.datetime.now())
+
+                if channel == "ishare":
+                    send_response = webhook_send_and_save_to_history(user_id=user_id, date_and_time=date_and_time,
+                                                                     date=date,
+                                                                     time=time,
+                                                                     amount=amount, receiver=receiver,
+                                                                     reference=reference,
+                                                                     paid_at=date_and_time, txn_type="ATFlexi",
+                                                                     color_code="Green", data_volume=bundle_package,
+                                                                     ishare_balance=0)
+                    data = send_response.data
+                    json_response = data.json()
+                    print(json_response)
+                    print(send_response.status_code)
+                    batch_id = json_response["batch_id"]
+                    first_name = json_response["first_name"]
+                    print(batch_id)
+                    sleep(10)
+                    ishare_verification_response = ishare_verification(batch_id)
+                    if ishare_verification_response is not False:
+                        code = \
+                            ishare_verification_response["flexiIshareTranxStatus"]["flexiIshareTranxStatusResult"][
+                                "apiResponse"][
+                                "responseCode"]
+                        ishare_response = \
+                            ishare_verification_response["flexiIshareTranxStatus"]["flexiIshareTranxStatusResult"][
+                                "ishareApiResponseData"][
+                                "apiResponseData"][
+                                0][
+                                "responseMsg"]
+                        print(code)
+                        print(ishare_response)
+                        if code == '200' or ishare_response == 'Crediting Successful.':
+                            sms = f"Hey there\nYour account has been credited with {bundle_package}MB.\nConfirm your new balance using the AT Mobile App"
+                            r_sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to={receiver}&from=InternetHub&sms={sms}"
+                            response = requests.request("GET", url=r_sms_url)
+                            print(response.text)
+                            doc_ref = history_collection.document(date_and_time)
+                            doc_ref.update({'done': 'Successful', 'status': 'Successful'})
+                            mail_doc_ref = mail_collection.document(f"{batch_id}-Mail")
+                            file_path = 'wallet_api_app/mail.txt'  # Replace with your file path
+
+                            name = first_name
+                            volume = bundle_package
+                            date = date_and_time
+                            reference_t = reference
+                            receiver_t = receiver
+
+                            with open(file_path, 'r') as file:
+                                html_content = file.read()
+
+                            placeholders = {
+                                '{name}': name,
+                                '{volume}': volume,
+                                '{date}': date,
+                                '{reference}': reference_t,
+                                '{receiver}': receiver_t
+                            }
+
+                            for placeholder, value in placeholders.items():
+                                html_content = html_content.replace(placeholder, str(value))
+
+                            mail_doc_ref.set({
+                                'to': email,
+                                'message': {
+                                    'subject': 'AT Flexi Bundle',
+                                    'html': html_content,
+                                    'messageId': 'Bestpay'
+                                }
+                            })
+                            return HttpResponse(status=200)
+                        else:
+                            doc_ref = history_collection.document(date_and_time)
+                            doc_ref.update({'done': 'Failed'})
+                            return HttpResponse(status=500)
+                    else:
+                        return HttpResponse(status=500)
+                elif channel == "mtn_flexi":
+                    user_details = get_user_details(user_id)
+                    first_name = user_details['first name']
+                    last_name = user_details['last name']
+                    email = user_details['email']
+                    phone = user_details['phone']
+                    details = {
+                        'first_name': first_name,
+                        'last_name': last_name,
+                        'email': email,
+                        'user_id': user_id
+                    }
+                    mtn_response = mtn_flexi_transaction(receiver=receiver, date_and_time=date_and_time, date=date,
+                                                         time=time, amount=amount, data_volume=bundle_package,
+                                                         channel="MoMo", phone=phone, ref=reference, details=details)
+                    if mtn_response.status_code == 200:
+                        return HttpResponse(status=200)
+                    else:
+                        return HttpResponse(status=500)
+                elif channel == "big-time":
+                    user_details = get_user_details(user_id)
+                    first_name = user_details['first name']
+                    last_name = user_details['last name']
+                    email = user_details['email']
+                    phone = user_details['phone']
+                    details = {
+                        'first_name': first_name,
+                        'last_name': last_name,
+                        'email': email,
+                        'user_id': user_id
+                    }
+                    big_time_response = big_time_transaction(receiver=receiver, date_and_time=date_and_time, date=date,
+                                                             time=time, amount=amount, data_volume=bundle_package,
+                                                             channel="MoMo", phone=phone, ref=reference,
+                                                             details=details)
+                    if big_time_response.status_code == 200:
+                        return HttpResponse(status=200)
+                    else:
+                        return HttpResponse(status=500)
+            else:
+                return HttpResponse(status=200)
+    else:
+        return HttpResponse(status=405)
