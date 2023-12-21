@@ -1407,6 +1407,7 @@ def paystack_webhook(request):
             print(payload.get('data'))
             r_data = payload.get('data')
             print(r_data.get('metadata'))
+            print(payload.get('event'))
             if payload.get('event') == 'charge.success':
                 receiver = payload.get('receiver')
                 bundle_package = payload.get('bundle_package')
