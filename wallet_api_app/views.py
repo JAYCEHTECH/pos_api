@@ -1386,7 +1386,9 @@ def big_time_transaction(receiver, date, time, date_and_time, phone, amount, dat
 def paystack_webhook(request):
     if request.method == "POST":
         paystack_secret_key = config("PAYSTACK_SECRET_KEY")
+        print(paystack_secret_key)
         payload = json.loads(request.body)
+        print(payload)
 
         paystack_signature = request.headers.get("X-Paystack-Signature")
 

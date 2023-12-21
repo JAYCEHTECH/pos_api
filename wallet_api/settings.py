@@ -71,7 +71,8 @@ CORS_ALLOWED_ORIGINS = [  # Replace with your allowed domain(s)
     'https://www.bestpaygh.com',
     'https://console.bestpaygh.com',
     'https://posapi.bestpaygh.com',
-    'https://webhook-5n2u9.ondigitalocean.app'
+    'https://webhook-5n2u9.ondigitalocean.app',
+    'https://webhook.bestpaygh.com'
 ]
 
 CORS_ALLOW_METHODS = [
