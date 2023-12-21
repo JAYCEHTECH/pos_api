@@ -1418,6 +1418,8 @@ def paystack_webhook(request):
                 bundle_package = metadata.get('bundle_package')
                 channel = metadata.get('channel')
                 user_id = metadata.get('user_id')
+                real_amount = metadata.get('real_amount')
+                print(real_amount)
                 amount = r_data.get('amount')
                 email = r_data.get('email')
                 reference = r_data.get('reference')
