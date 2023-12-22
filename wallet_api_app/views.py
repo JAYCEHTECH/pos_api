@@ -1442,7 +1442,8 @@ def paystack_webhook(request):
                 user_id = metadata.get('user_id')
                 real_amount = metadata.get('real_amount')
                 print(real_amount)
-                amount = float(r_data.get('amount')) / 100
+                paid_amount = float(r_data.get('amount')) / 100
+                amount = real_amount
                 email = r_data.get('email')
                 reference = r_data.get('reference')
                 date = metadata.get("date")
