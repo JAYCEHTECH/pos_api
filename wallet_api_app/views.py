@@ -1211,7 +1211,10 @@ def webhook_send_and_save_to_history(user_id, txn_type: str, paid_at: str, ishar
     print(f"hello:{json_response}")
     status_code = status_code
     print(status_code)
-    batch_id = json_response["batch_id"]
+    try:
+        batch_id = json_response["batch_id"]
+    except KeyError:
+        batch_id = "unknown"
     print(batch_id)
 
     doc_ref = history_collection.document(date_and_time)
@@ -1221,7 +1224,7 @@ def webhook_send_and_save_to_history(user_id, txn_type: str, paid_at: str, ishar
     print("firebase saved")
     # return status_code, batch_id if batch_id else "No batchId", email, first_name
     return Response(
-        data={'status_code': status_code, 'batch_id': batch_id, 'email': email, 'first_name': first_name},
+        data=json_response,
         status=status.HTTP_200_OK)
 
 
@@ -1549,7 +1552,12 @@ def paystack_webhook(request):
                         batch_id = json_response["batch_id"]
                     except KeyError:
                         return HttpResponse(status=500)
-                    first_name = json_response["first_name"]
+                    user_details = get_user_details(user_id)
+                    first_name = user_details['first name']
+                    last_name = user_details['last name']
+                    email = user_details['email']
+                    phone = user_details['phone']
+                    first_name = first_name
                     print(batch_id)
                     sleep(10)
                     ishare_verification_response = ishare_verification(batch_id)
