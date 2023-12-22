@@ -1604,7 +1604,7 @@ def paystack_webhook(request):
                     mtn_response = mtn_flexi_transaction(receiver=receiver, date_and_time=date_and_time, date=date,
                                                          time=time, amount=amount, data_volume=bundle_package,
                                                          channel="MoMo", phone=phone, ref=reference, details=details)
-                    print("after mtn response")
+                    print("after mtn responses")
                     if mtn_response.status_code == 200 or mtn_response.data["code"] == "0000":
                         print("mtn donnnneeee")
                         print("yooo")
