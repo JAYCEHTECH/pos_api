@@ -1200,7 +1200,8 @@ def webhook_send_and_save_to_history(user_id, txn_type: str, paid_at: str, ishar
                     pass
         else:
             pass
-
+    else:
+        pass
     print("moving on")
     data = {
         'batch_id': "unknown",
