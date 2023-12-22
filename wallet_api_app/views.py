@@ -1467,7 +1467,7 @@ def paystack_webhook(request):
                     if json_response["code"] == "0001":
                         print("json response not 0000")
                         confirm_response = confirm(reference)
-                        print(confirm_response)
+                        print(f"confirm response{confirm_response}")
                         if confirm_response["code"] == "0000":
                             print("resolved")
                             return HttpResponse(status=200)
