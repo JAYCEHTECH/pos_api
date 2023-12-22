@@ -1490,7 +1490,8 @@ def paystack_webhook(request):
                                 batch_id = send_response.data["batch_id"]
                             except KeyError:
                                 return HttpResponse(status=500)
-                            first_name = json_response["first_name"]
+                            user_details = get_user_details(user_id)
+                            first_name = user_details['first name']
                             print(batch_id)
                             if json_response["code"] == "0000":
                                 sms = f"Hey there\nYour account has been credited with {bundle_package}MB.\nConfirm your new balance using the AT Mobile App"
