@@ -1399,8 +1399,8 @@ def confirm(reference):
 
     payload = ""
     headers = {
-        'api-key': config('api-key'),
-        'api-secret': config('api-secret'),
+        'api-key': config('api_key'),
+        'api-secret': config('api_secret'),
     }
 
     response = requests.request("POST", url, headers=headers, data=payload)
