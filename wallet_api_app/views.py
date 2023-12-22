@@ -1640,14 +1640,15 @@ def paystack_webhook(request):
                     phone = user_details['phone']
                     previous_wallet = user_details['wallet']
                     to_be_added = float(amount)
-                    print(to_be_added)
+                    print(f"amount to be added: {to_be_added}")
                     new_balance = previous_wallet + to_be_added
-                    print(new_balance)
+                    print(f" new balance: {new_balance}")
                     doc_ref = user_collection.document(user_id)
                     doc_ref.update(
                         {'wallet': new_balance, 'wallet_last_update': date_and_time,
                          'recent_wallet_reference': reference})
                     print(doc_ref.get().to_dict())
+                    print("before all data")
                     all_data = {
                         'batch_id': "unknown",
                         'buyer': phone,
