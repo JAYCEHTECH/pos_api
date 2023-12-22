@@ -1485,8 +1485,9 @@ def paystack_webhook(request):
                                                                              data_volume=bundle_package,
                                                                              ishare_balance=0, txn_status=txn_status)
                             print(send_response.status_code)
+                            print(f"hey: {send_response.data}")
                             try:
-                                batch_id = json_response["batch_id"]
+                                batch_id = send_response.data["batch_id"]
                             except KeyError:
                                 return HttpResponse(status=500)
                             first_name = json_response["first_name"]
