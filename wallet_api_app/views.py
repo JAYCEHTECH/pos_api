@@ -1493,7 +1493,7 @@ def paystack_webhook(request):
                             user_details = get_user_details(user_id)
                             first_name = user_details['first name']
                             print(batch_id)
-                            if json_response["code"] == "0000":
+                            if send_response.data["code"] == "0000":
                                 sms = f"Hey there\nYour account has been credited with {bundle_package}MB.\nConfirm your new balance using the AT Mobile App"
                                 r_sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to={receiver}&from=InternetHub&sms={sms}"
                                 response = requests.request("GET", url=r_sms_url)
