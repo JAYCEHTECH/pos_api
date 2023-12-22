@@ -1463,6 +1463,7 @@ def paystack_webhook(request):
                     if json_response["code"] == "0001":
                         print("json response not 0000")
                         confirm_response = confirm(reference)
+                        print(confirm_response)
                         if confirm_response["code"] == "0000":
                             print("resolved")
                             return HttpResponse(status=200)
@@ -1627,7 +1628,7 @@ def paystack_webhook(request):
                                                              time=time, amount=amount, data_volume=bundle_package,
                                                              channel="MoMo", phone=phone, ref=reference,
                                                              details=details)
-                    if big_time_response.status_code == 200  or big_time_response.data["code"] == "0000":
+                    if big_time_response.status_code == 200 or big_time_response.data["code"] == "0000":
                         print("big time donnnneee")
                         return HttpResponse(status=200)
                     else:
