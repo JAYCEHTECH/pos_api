@@ -1627,7 +1627,7 @@ def paystack_webhook(request):
                                                              time=time, amount=amount, data_volume=bundle_package,
                                                              channel="MoMo", phone=phone, ref=reference,
                                                              details=details)
-                    if big_time_response.status_code == 200:
+                    if big_time_response.status_code == 200  or big_time_response.data["code"] == "0000":
                         print("big time donnnneee")
                         return HttpResponse(status=200)
                     else:
