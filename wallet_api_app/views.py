@@ -1499,7 +1499,10 @@ def paystack_webhook(request):
                                 response = requests.request("GET", url=r_sms_url)
                                 print(response.text)
                                 doc_ref = history_collection.document(date_and_time)
-                                doc_ref.update({'done': 'Successful', 'status': 'Successful'})
+                                if doc_ref.get().exists:
+                                    doc_ref.update({'done': 'Successful', 'status': 'Successful'})
+                                else:
+                                    print("retry found no entry")
                                 mail_doc_ref = mail_collection.document(f"{batch_id}-Mail")
                                 file_path = 'wallet_api_app/mail.txt'  # Replace with your file path
 
