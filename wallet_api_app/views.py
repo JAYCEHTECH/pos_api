@@ -1218,8 +1218,9 @@ def webhook_send_and_save_to_history(user_id, txn_type: str, paid_at: str, ishar
     print(batch_id)
 
     doc_ref = history_collection.document(date_and_time)
-    doc_ref.update({'batch_id': batch_id, 'responseCode': status_code})
-    history_web.collection(email).document(date_and_time).update({'batch_id': batch_id, 'responseCode': status_code})
+    if doc_ref.exists:
+        doc_ref.update({'batch_id': batch_id, 'responseCode': status_code})
+        history_web.collection(email).document(date_and_time).update({'batch_id': batch_id, 'responseCode': status_code})
 
     print("firebase saved")
     # return status_code, batch_id if batch_id else "No batchId", email, first_name
