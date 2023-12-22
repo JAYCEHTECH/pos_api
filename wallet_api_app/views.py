@@ -1463,6 +1463,8 @@ def paystack_webhook(request):
                                 message = confirmed_response["api_response"]["message"]
                                 if message == "Transaction Successful":
                                     return HttpResponse(status=200)
+                                else:
+                                    return HttpResponse(status=500)
                             except KeyError:
                                 new_ref = secrets.token_hex(4)
                                 send_response = webhook_send_and_save_to_history(user_id=user_id,
@@ -1653,6 +1655,8 @@ def paystack_webhook(request):
                         return HttpResponse(status=200)
                     else:
                         return HttpResponse(status=500)
+                elif channel == "top_up":
+                    ...
                 else:
                     return HttpResponse(status=200)
             else:
