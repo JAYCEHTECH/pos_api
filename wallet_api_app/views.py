@@ -1167,7 +1167,7 @@ def webhook_send_and_save_to_history(user_id, txn_type: str, paid_at: str, ishar
                                      color_code: str,
                                      data_volume: float, reference: str, amount: float,
                                      receiver: str,
-                                     date: str, time: str, date_and_time: str):
+                                     date: str, time: str, date_and_time: str, txn_status):
     user_details = get_user_details(user_id)
     first_name = user_details['first name']
     last_name = user_details['last name']
@@ -1192,7 +1192,7 @@ def webhook_send_and_save_to_history(user_id, txn_type: str, paid_at: str, ishar
         'paid_at': paid_at,
         'reference': reference,
         'responseCode': "0",
-        'status': "Pending",
+        'status': txn_status,
         'time': time,
         'tranxId': str(tranx_id_gen()),
         'type': txn_type,
@@ -1229,7 +1229,7 @@ def webhook_send_and_save_to_history(user_id, txn_type: str, paid_at: str, ishar
 
 
 def mtn_flexi_transaction(receiver, date, time, date_and_time, phone, amount, data_volume, details: dict, ref,
-                          channel):
+                          channel, txn_status):
     data = {
         'batch_id': "unknown",
         'buyer': phone,
@@ -1248,7 +1248,7 @@ def mtn_flexi_transaction(receiver, date, time, date_and_time, phone, amount, da
         'paid_at': date_and_time,
         'reference': ref,
         'responseCode': 200,
-        'status': "Success",
+        'status': txn_status,
         'time': time,
         'tranxId': str(tranx_id_gen()),
         'type': "MTNFlexi",
@@ -1280,7 +1280,7 @@ def mtn_flexi_transaction(receiver, date, time, date_and_time, phone, amount, da
         'paid_at': date_and_time,
         'payment_status': "success",
         'reference': ref,
-        'status': "Completed",
+        'status': txn_status,
         'time': time,
         'tranxId': tranx_id,
         'type': "MTN Other Data"
@@ -1326,7 +1326,7 @@ def mtn_flexi_transaction(receiver, date, time, date_and_time, phone, amount, da
 
 
 def big_time_transaction(receiver, date, time, date_and_time, phone, amount, data_volume, details: dict, ref,
-                         channel):
+                         channel, txn_status):
     data = {
         'batch_id': "unknown",
         'buyer': phone,
@@ -1345,7 +1345,7 @@ def big_time_transaction(receiver, date, time, date_and_time, phone, amount, dat
         'paid_at': str(date_and_time),
         'reference': ref,
         'responseCode': 200,
-        'status': "Success",
+        'status': txn_status,
         'time': time,
         'tranxId': str(tranx_id_gen()),
         'type': "BigTime",
@@ -1440,12 +1440,13 @@ def paystack_webhook(request):
                 user_id = metadata.get('user_id')
                 real_amount = metadata.get('real_amount')
                 print(real_amount)
-                amount = r_data.get('amount')
+                amount = float(r_data.get('amount')) / 100
                 email = r_data.get('email')
                 reference = r_data.get('reference')
-                date = str(datetime.datetime.now().date())
-                time = str(datetime.datetime.now().time())
-                date_and_time = str(datetime.datetime.now())
+                date = metadata.get("date")
+                time = metadata.get("time")
+                date_and_time = metadata.get("date_and_time")
+                txn_status = metadata.get("txn_status")
 
                 if channel == "ishare":
                     send_response = webhook_send_and_save_to_history(user_id=user_id, date_and_time=date_and_time,
@@ -1455,7 +1456,7 @@ def paystack_webhook(request):
                                                                      reference=reference,
                                                                      paid_at=date_and_time, txn_type="ATFlexi",
                                                                      color_code="Green", data_volume=bundle_package,
-                                                                     ishare_balance=0)
+                                                                     ishare_balance=0, txn_status=txn_status)
                     data = send_response.data
                     json_response = data
                     print(json_response)
@@ -1479,7 +1480,7 @@ def paystack_webhook(request):
                                                                              paid_at=date_and_time, txn_type="ATFlexi",
                                                                              color_code="Green",
                                                                              data_volume=bundle_package,
-                                                                             ishare_balance=0)
+                                                                             ishare_balance=0, txn_status=txn_status)
                             print(send_response.status_code)
                             try:
                                 batch_id = json_response["batch_id"]
@@ -1604,7 +1605,8 @@ def paystack_webhook(request):
                     }
                     mtn_response = mtn_flexi_transaction(receiver=receiver, date_and_time=date_and_time, date=date,
                                                          time=time, amount=amount, data_volume=bundle_package,
-                                                         channel="MoMo", phone=phone, ref=reference, details=details)
+                                                         channel="MoMo", phone=phone, ref=reference, details=details,
+                                                         txn_status=txn_status)
                     print("after mtn responses")
                     if mtn_response.status_code == 200 or mtn_response.data["code"] == "0000":
                         print("mtn donnnneeee")
@@ -1627,7 +1629,7 @@ def paystack_webhook(request):
                     big_time_response = big_time_transaction(receiver=receiver, date_and_time=date_and_time, date=date,
                                                              time=time, amount=amount, data_volume=bundle_package,
                                                              channel="MoMo", phone=phone, ref=reference,
-                                                             details=details)
+                                                             details=details, txn_status=txn_status)
                     if big_time_response.status_code == 200 or big_time_response.data["code"] == "0000":
                         print("big time donnnneee")
                         return HttpResponse(status=200)
