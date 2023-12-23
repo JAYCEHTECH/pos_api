@@ -1620,11 +1620,15 @@ def paystack_webhook(request):
                 elif channel == "top_up":
                     user_details = get_user_details(user_id)
                     if user_details is not None:
+                        print(user_details)
                         first_name = user_details['first name']
                         last_name = user_details['last name']
                         email = user_details['email']
                         phone = user_details['phone']
-                        previous_wallet = user_details['wallet']
+                        try:
+                            previous_wallet = user_details['wallet']
+                        except KeyError:
+                            previous_wallet = 0
                     else:
                         first_name = ""
                         last_name = ""
