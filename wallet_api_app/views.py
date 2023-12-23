@@ -70,7 +70,6 @@ def get_user_details(user_id):
         last_name = doc_dict['last name']
         email = doc_dict['email']
         phone = doc_dict['phone']
-        print(doc_dict['wallet'])
         print(first_name), print(last_name), print(email), print(phone)
         return doc.to_dict()
     else:
