@@ -483,7 +483,6 @@ class WalletUserBalance(APIView):
             return Response({'code': '0001', 'message': "User not found"}, status=status.HTTP_400_BAD_REQUEST)
         serializer = serializers.WalletUserSerializer(data=data)
         if serializer.is_valid():
-
             user_details = get_user_details(user_id)
             first_name = user_details['first name']
             last_name = user_details['last name']
@@ -498,31 +497,38 @@ class WalletUserBalance(APIView):
             doc_ref.update(
                 {'wallet': new_balance, 'wallet_last_update': date_and_time, 'recent_wallet_reference': reference})
             print(doc_ref.get().to_dict())
-            # data = {
-            #     'batch_id': "unknown",
-            #     'buyer': phone,
-            #     'color_code': color_code,
-            #     'amount': amount,
-            #     'data_break_down': data_break_down,
-            #     'data_volume': data_volume,
-            #     'date': date,
-            #     'date_and_time': date_and_time,
-            #     'done': "Success",
-            #     'email': email,
-            #     'image': image,
-            #     'ishareBalance': ishare_balance,
-            #     'name': f"{first_name} {last_name}",
-            #     'number': receiver,
-            #     'paid_at': paid_at,
-            #     'reference': reference,
-            #     'responseCode': 200,
-            #     'status': txn_status,
-            #     'time': time,
-            #     'tranxId': str(tranx_id_gen()),
-            #     'type': txn_type,
-            #     'uid': user_id
-            # }
-            # history_web.collection(email).document(date_and_time).set(data)
+
+            all_data = {
+                'batch_id': "unknown",
+                'buyer': phone,
+                'color_code': color_code,
+                'amount': amount,
+                'data_break_down': data_break_down,
+                'data_volume': data_volume,
+                'date': date,
+                'date_and_time': date_and_time,
+                'done': "Success",
+                'email': email,
+                'image': user_id,
+                'ishareBalance': ishare_balance,
+                'name': f"{first_name} {last_name}",
+                'number': receiver,
+                'paid_at': paid_at,
+                'reference': reference,
+                'responseCode': 200,
+                'status': txn_status,
+                'time': time,
+                'tranxId': str(tranx_id_gen()),
+                'type': txn_type,
+                'uid': user_id
+            }
+            history_web.collection(email).document(date_and_time).set(all_data)
+            print("saved")
+            history_collection.document(date_and_time).set(all_data)
+            print(f"ya{history_collection.document(date_and_time).get().to_dict()}")
+            print("saved")
+            print(f"yo{history_web.collection(email).document(date_and_time).get().to_dict()}")
+
             name = f"{first_name} {last_name}"
             amount = to_be_added
             file_path = 'wallet_api_app/wallet_mail.txt'

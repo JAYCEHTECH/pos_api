@@ -1,16 +1,22 @@
 import requests
+import json
 
-url = f"https://console.bestpaygh.com/api/flexi/v1/transaction_detail/T682709328318817/"
+url = "https://posapi.bestpaygh.com/api/v1/initiate_mtn_transaction"
 
-payload = ""
+payload = json.dumps({
+  "user_id": "9VA0qyq6lXYPZ6Ut867TVcBvF2t1",
+  "receiver": "0242442147",
+  "data_volume": 50,
+  "reference": "look3",
+  "amount": 5667789,
+  "channel": "wallet"
+})
 headers = {
-    'api-key': "YZIDF9C3G1-MJS1ZLAMTSZT9DN3YYZ19",
-    'api-secret': "M6FXA0$UBS-ACRA2FHFW$MC333$9TFU5UYK3$69UU77NOGC$NC8S53TL9O66ZR0Y",
+  'Authorization': 'HelloWorld',
+  'Content-Type': 'application/json',
+  'Cookie': '__cf_bm=7LzHGGJeBXVRXySsW5Ej4IR8rwiJ5xrPGmf9mgS4mSY-1703327140-1-Aew1VVW7QqtoLHb7+DR3pBlK7eW2PKtLDvvdKedQc9eI3nMNF3nAX/+gc0hQPnl71Kbyz0yoJRL3PNxKK57V17g='
 }
 
 response = requests.request("POST", url, headers=headers, data=payload)
 
-response = response.json()
-print(response["code"])
-
-
+print(response.text)
