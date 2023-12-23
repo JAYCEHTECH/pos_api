@@ -1245,7 +1245,8 @@ def webhook_send_and_save_to_history(user_id, txn_type: str, paid_at: str, ishar
     history_collection.document(date_and_time).set(data)
     history_web.collection(email).document(date_and_time).set(data)
 
-    print("first save")
+    if history_collection.document(date_and_time).get().exists:
+        print("first save")
 
     ishare_response, status_code = send_ishare_bundle(first_name=first_name, last_name=last_name, receiver=receiver,
                                                       buyer=phone,
@@ -1651,6 +1652,36 @@ def paystack_webhook(request):
                         email = ""
                         phone = ""
                         previous_wallet = 0
+                    all_data = {
+                        'batch_id': "unknown",
+                        'buyer': phone,
+                        'color_code': "Green",
+                        'amount': amount,
+                        'data_break_down': amount,
+                        'data_volume': bundle_package,
+                        'date': date,
+                        'date_and_time': date_and_time,
+                        'done': "Success",
+                        'email': email,
+                        'image': user_id,
+                        'ishareBalance': 0,
+                        'name': f"{first_name} {last_name}",
+                        'number': receiver,
+                        'paid_at': date_and_time,
+                        'reference': reference,
+                        'responseCode': 200,
+                        'status': "",
+                        'time': time,
+                        'tranxId': str(tranx_id_gen()),
+                        'type': "WALLETTOPUP",
+                        'uid': user_id
+                    }
+                    history_web.collection(email).document(date_and_time).set(all_data)
+                    print("f saved")
+                    history_collection.document(date_and_time).set(all_data)
+                    print(f"ya{history_collection.document(date_and_time).get().to_dict()}")
+                    print("f saved")
+                    print(f"yo{history_web.collection(email).document(date_and_time).get().to_dict()}")
                     to_be_added = float(amount)
                     print(f"amount to be added: {to_be_added}")
                     new_balance = previous_wallet + to_be_added
