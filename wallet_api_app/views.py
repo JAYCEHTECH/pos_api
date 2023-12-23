@@ -1481,11 +1481,16 @@ def paystack_webhook(request):
                 txn_status = metadata.get("txn_status")
 
                 user_details = get_user_details(user_id)
-                first_name = user_details['first name']
-                last_name = user_details['last name']
-                email = user_details['email']
-                phone = user_details['phone']
-                first_name = first_name
+                if user_details is not None:
+                    first_name = user_details['first name']
+                    last_name = user_details['last name']
+                    email = user_details['email']
+                    phone = user_details['phone']
+                    first_name = first_name
+                else:
+                    first_name = ""
+                    email = ""
+
 
                 if channel == "ishare":
                     send_response = webhook_send_and_save_to_history(user_id=user_id, date_and_time=date_and_time,
@@ -1560,10 +1565,16 @@ def paystack_webhook(request):
                             return HttpResponse(status=500)
                 elif channel == "mtn_flexi":
                     user_details = get_user_details(user_id)
-                    first_name = user_details['first name']
-                    last_name = user_details['last name']
-                    email = user_details['email']
-                    phone = user_details['phone']
+                    if user_details is not None:
+                        first_name = user_details['first name']
+                        last_name = user_details['last name']
+                        email = user_details['email']
+                        phone = user_details['phone']
+                    else:
+                        first_name = ""
+                        last_name = ""
+                        email = ""
+                        phone = ""
                     details = {
                         'first_name': first_name,
                         'last_name': last_name,
@@ -1582,11 +1593,16 @@ def paystack_webhook(request):
                     else:
                         return HttpResponse(status=500)
                 elif channel == "big-time":
-                    user_details = get_user_details(user_id)
-                    first_name = user_details['first name']
-                    last_name = user_details['last name']
-                    email = user_details['email']
-                    phone = user_details['phone']
+                    if user_details is not None:
+                        first_name = user_details['first name']
+                        last_name = user_details['last name']
+                        email = user_details['email']
+                        phone = user_details['phone']
+                    else:
+                        first_name = ""
+                        last_name = ""
+                        email = ""
+                        phone = ""
                     details = {
                         'first_name': first_name,
                         'last_name': last_name,
@@ -1604,11 +1620,18 @@ def paystack_webhook(request):
                         return HttpResponse(status=500)
                 elif channel == "top_up":
                     user_details = get_user_details(user_id)
-                    first_name = user_details['first name']
-                    last_name = user_details['last name']
-                    email = user_details['email']
-                    phone = user_details['phone']
-                    previous_wallet = user_details['wallet']
+                    if user_details is not None:
+                        first_name = user_details['first name']
+                        last_name = user_details['last name']
+                        email = user_details['email']
+                        phone = user_details['phone']
+                        previous_wallet = user_details['wallet']
+                    else:
+                        first_name = ""
+                        last_name = ""
+                        email = ""
+                        phone = ""
+                        previous_wallet = 0
                     to_be_added = float(amount)
                     print(f"amount to be added: {to_be_added}")
                     new_balance = previous_wallet + to_be_added
