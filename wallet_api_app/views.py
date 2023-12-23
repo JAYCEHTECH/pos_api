@@ -179,6 +179,7 @@ def send_and_save_to_history(user_id, txn_type: str, txn_status: str, paid_at: s
     last_name = user_details['last name']
     email = user_details['email']
     phone = user_details['phone']
+    wallet = user_details['wallet']
 
     data = {
         'batch_id': "unknown",
@@ -202,7 +203,8 @@ def send_and_save_to_history(user_id, txn_type: str, txn_status: str, paid_at: s
         'time': time,
         'tranxId': str(tranx_id_gen()),
         'type': txn_type,
-        'uid': user_id
+        'uid': user_id,
+        'bal': wallet
     }
     history_collection.document(date_and_time).set(data)
     history_web.collection(email).document(date_and_time).set(data)
@@ -754,6 +756,8 @@ class InitiateBigTimeTransaction(APIView):
                     print(f"new_user_wallet: {new_user_wallet}")
                 else:
                     print("it's fine")
+            user = get_user_details(user_id)
+            bal = user['wallet']
             data = {
                 'batch_id': "unknown",
                 'buyer': phone,
@@ -774,6 +778,7 @@ class InitiateBigTimeTransaction(APIView):
                 'responseCode': 200,
                 'status': txn_status,
                 'time': time,
+                'bal': bal,
                 'tranxId': str(tranx_id_gen()),
                 'type': txn_type,
                 'uid': user_id
@@ -880,7 +885,8 @@ class InitiateMTNTransaction(APIView):
                     print(f"new_user_wallet: {new_user_wallet}")
                 else:
                     print("it's fine")
-
+            user = get_user_details(user_id)
+            bal = user['wallet']
             data = {
                 'batch_id': "unknown",
                 'buyer': phone,
@@ -901,6 +907,7 @@ class InitiateMTNTransaction(APIView):
                 'responseCode': 200,
                 'status': txn_status,
                 'time': time,
+                'bal': bal,
                 'tranxId': str(tranx_id_gen()),
                 'type': txn_type,
                 'uid': user_id
@@ -912,6 +919,8 @@ class InitiateMTNTransaction(APIView):
             doc = user.get()
             print(doc.to_dict())
             tranx_id = doc.to_dict()['tranxId']
+            user = get_user_details(user_id)
+            bal = user['wallet']
             second_data = {
                 'amount': amount,
                 'batch_id': "unknown",
@@ -933,6 +942,7 @@ class InitiateMTNTransaction(APIView):
                 'reference': reference,
                 'status': "Completed",
                 'time': time,
+                'bal': bal,
                 'tranxId': tranx_id,
                 'type': "MTN Other Data"
             }
