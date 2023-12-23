@@ -1298,7 +1298,7 @@ def mtn_flexi_transaction(receiver, date, time, date_and_time, phone, amount, da
         'status': txn_status,
         'time': time,
         'tranxId': str(tranx_id_gen()),
-        'type': "MTNFlexi",
+        'type': "Flexi MTN",
         'uid': details["user_id"]
     }
 
@@ -1395,7 +1395,7 @@ def big_time_transaction(receiver, date, time, date_and_time, phone, amount, dat
         'status': txn_status,
         'time': time,
         'tranxId': str(tranx_id_gen()),
-        'type': "BigTime",
+        'type': "AT Big Time",
         'uid': details['user_id']
     }
     history_collection.document(date_and_time).set(data)
@@ -1539,7 +1539,7 @@ def paystack_webhook(request):
                             response = requests.request("GET", url=r_sms_url)
                             doc_ref = history_collection.document(date_and_time)
                             if doc_ref.get().exists:
-                                doc_ref.update({'done': 'Successful', 'status': 'Successful'})
+                                doc_ref.update({'done': 'Successful'})
                             else:
                                 print("no entry")
                             mail_doc_ref = mail_collection.document(f"{batch_id}-Mail")
@@ -1670,7 +1670,7 @@ def paystack_webhook(request):
                         'paid_at': date_and_time,
                         'reference': reference,
                         'responseCode': 200,
-                        'status': "",
+                        'status': txn_status,
                         'time': time,
                         'tranxId': str(tranx_id_gen()),
                         'type': "WALLETTOPUP",
@@ -1710,7 +1710,7 @@ def paystack_webhook(request):
                         'paid_at': date_and_time,
                         'reference': reference,
                         'responseCode': 200,
-                        'status': "success",
+                        'status': txn_status,
                         'time': time,
                         'tranxId': str(tranx_id_gen()),
                         'type': "WALLETTOPUP",
