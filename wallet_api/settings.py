@@ -92,7 +92,8 @@ CORS_ALLOW_HEADERS = [
     'accept-encoding',
     'Accept-Language',
     'Content-Type',
-    'Authorization'
+    'Authorization',
+    'authorization'
     'Api-Key',
     'Api-Secret',
     'api-key',
@@ -105,9 +106,8 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
     'cache-control',
     'pragma',
-    'Access-Control-Allow-Methods',
-    'Access-Control-Allow-Headers'
 ]
+
 
 ROOT_URLCONF = 'wallet_api.urls'
 
