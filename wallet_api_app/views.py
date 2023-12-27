@@ -1101,7 +1101,7 @@ class MTNFlexiInitiate(APIView):
                         'status': "Saved",
                         'time': str(datetime.datetime.now().time()),
                         'tranxId': str(tranx_id_gen()),
-                        'type': "MTN Flexi",
+                        'type': "Flexi MTN",
                         'uid': user_id
                     }
 
@@ -1135,7 +1135,7 @@ class MTNFlexiInitiate(APIView):
                         'status': "Completed",
                         'time': str(datetime.datetime.now().time()),
                         'tranxId': tranx_id,
-                        'type': "MTN Other Data"
+                        'type': "Flexi MTN"
                     }
                     mtn_other.document(date_and_time).set(second_data)
                     user22 = mtn_other.document(date_and_time)
