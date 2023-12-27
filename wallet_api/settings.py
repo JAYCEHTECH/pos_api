@@ -76,7 +76,12 @@ CORS_ALLOWED_ORIGINS = [  # Replace with your allowed domain(s)
     'https://webhook.bestpaygh.com',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
-    'https://www.nobledatagh.com'
+    'https://www.nobledatagh.com',
+    'https://www.aunicetopupgh.com',
+    'https://www.gh-bay.com',
+    'https://www.dataforall.store',
+    'https://www.bestpluggh.com',
+    'https://www.ghdatahubs.com'
 ]
 
 CORS_ALLOW_METHODS = [
