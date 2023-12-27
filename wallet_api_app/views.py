@@ -148,8 +148,8 @@ def send_ishare_bundle(first_name: str, last_name: str, buyer, receiver: str, em
     }
 
     payload = json.dumps({
-        "first_name": first_name,
-        "last_name": last_name,
+        "first_name": first_name if first_name != "" else "First Name",
+        "last_name": last_name if last_name != "" else "Last Name",
         "account_number": buyer,
         "receiver": receiver,
         "account_email": email,
