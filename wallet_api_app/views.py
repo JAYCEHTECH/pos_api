@@ -1016,6 +1016,7 @@ class MTNFlexiInitiate(APIView):
             missing_params = [param for param in required_params if param not in request_data]
 
             if missing_params:
+                print(missing_params)
                 # If any required parameter is missing, return an error response
                 return Response({'code': '0001', 'message': f'Missing parameters: {", ".join(missing_params)}'},
                                 status=status.HTTP_400_BAD_REQUEST)
