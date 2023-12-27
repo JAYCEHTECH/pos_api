@@ -1028,7 +1028,7 @@ class MTNFlexiInitiate(APIView):
                 amount = data['amount']
                 channel = data['channel']
 
-                if data['channel'].lower() == "wallet":
+                if "wallet" == "wallet":
                     print("used this")
                     enough_balance = check_user_balance_against_price(data['user_id'], data['amount'])
                 else:
@@ -1048,7 +1048,7 @@ class MTNFlexiInitiate(APIView):
                     #     return redirect(f"https://{callback_url}")
                     # else:
                     #     print("no record found")
-                    if channel.lower() == "wallet":
+                    if "wallet" == "wallet":
                         print("updated")
                         user = get_user_details(user_id)
                         if user is None:
@@ -1082,7 +1082,7 @@ class MTNFlexiInitiate(APIView):
 
                     data = {
                         'batch_id': "unknown",
-                        'buyer': phone,
+                        'buyer': f"0{channel}",
                         'color_code': "Green",
                         'amount': amount,
                         'data_break_down': data_volume,
@@ -1114,7 +1114,7 @@ class MTNFlexiInitiate(APIView):
                     second_data = {
                         'amount': amount,
                         'batch_id': "unknown",
-                        'channel': channel,
+                        'channel': "wallet",
                         'color_code': "Green",
                         'created_at': date_and_time,
                         'data_volume': data_volume,
@@ -1126,7 +1126,7 @@ class MTNFlexiInitiate(APIView):
                         'ishareBalance': 0,
                         'name': f"{first_name} {last_name}",
                         'number': receiver,
-                        'buyer': phone,
+                        'buyer': f"0{channel}",
                         'paid_at': date_and_time,
                         'payment_status': "success",
                         'reference': reference,
