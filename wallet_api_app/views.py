@@ -998,6 +998,26 @@ class MTNFlexiInitiate(APIView):
         required_params = ['user_id', 'receiver', 'reference', 'data_volume', 'amount', 'channel']
         print(token)
         print(config("AT"))
+        prices_dict = {
+            1000: 4.3,
+            2000: 8.5,
+            3000: 12,
+            4000: 15,
+            5000: 20,
+            6000: 23,
+            7000: 27,
+            8000: 30,
+            9000: 34,
+            10000: 33,
+            12000: 45,
+            15000: 51,
+            20000: 66,
+            25000: 81,
+            30000: 97,
+            40000: 133,
+            50000: 162,
+            100000: 323
+        }
         # Check if the token matches the one in the environment variable
         if token != config("AT"):
             # Token matches, allow access
@@ -1026,11 +1046,12 @@ class MTNFlexiInitiate(APIView):
                 data_volume = data['data_volume']
                 reference = data['reference']
                 amount = data['amount']
+                amount_to_be_deducted = prices_dict[data_volume]
                 channel = data['channel']
 
                 if "wallet" == "wallet":
                     print("used this")
-                    enough_balance = check_user_balance_against_price(data['user_id'], data['amount'])
+                    enough_balance = check_user_balance_against_price(data['user_id'], amount_to_be_deducted)
                 else:
                     enough_balance = True
                     print("not wallet")
@@ -1055,7 +1076,7 @@ class MTNFlexiInitiate(APIView):
                             return None
                         previous_user_wallet = user['wallet']
                         print(f"previous wallet: {previous_user_wallet}")
-                        new_balance = float(previous_user_wallet) - float(amount)
+                        new_balance = float(previous_user_wallet) - float(amount_to_be_deducted)
                         print(f"new_balance:{new_balance}")
                         doc_ref = user_collection.document(user_id)
                         doc_ref.update({'wallet': new_balance})
@@ -1068,7 +1089,7 @@ class MTNFlexiInitiate(APIView):
                                 return None
                             previous_user_wallet = user['wallet']
                             print(f"previous wallet: {previous_user_wallet}")
-                            new_balance = float(previous_user_wallet) - float(amount)
+                            new_balance = float(previous_user_wallet) - float(amount_to_be_deducted)
                             print(f"new_balance:{new_balance}")
                             doc_ref = user_collection.document(user_id)
                             doc_ref.update({'wallet': new_balance})
@@ -1084,7 +1105,7 @@ class MTNFlexiInitiate(APIView):
                         'batch_id': "unknown",
                         'buyer': f"0{channel}",
                         'color_code': "Green",
-                        'amount': amount,
+                        'amount': amount_to_be_deducted,
                         'data_break_down': data_volume,
                         'data_volume': data_volume,
                         'date': str(datetime.datetime.now().date()),
@@ -1114,7 +1135,7 @@ class MTNFlexiInitiate(APIView):
                     print(doc.to_dict())
                     tranx_id = doc.to_dict()['tranxId']
                     second_data = {
-                        'amount': amount,
+                        'amount': amount_to_be_deducted,
                         'batch_id': "unknown",
                         'channel': "wallet",
                         'color_code': "Green",
