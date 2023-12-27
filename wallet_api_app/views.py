@@ -996,9 +996,10 @@ class MTNFlexiInitiate(APIView):
     def post(self, request):
         token = request.headers.get('Authorization')
         required_params = ['user_id', 'receiver', 'reference', 'data_volume', 'amount', 'channel']
-
+        print(token)
+        print(config("AT"))
         # Check if the token matches the one in the environment variable
-        if token != "HelloWorld":
+        if token != config("AT"):
             # Token matches, allow access
             return Response({'code': '0001', 'message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
         else:
