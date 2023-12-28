@@ -1103,7 +1103,7 @@ class MTNFlexiInitiate(APIView):
 
                     data = {
                         'batch_id': "unknown",
-                        'buyer': f"0{channel}",
+                        'buyer': channel,
                         'color_code': "Green",
                         'amount': amount_to_be_deducted,
                         'data_break_down': data_volume,
@@ -1149,7 +1149,7 @@ class MTNFlexiInitiate(APIView):
                         'ishareBalance': 0,
                         'name': f"{first_name} {last_name}",
                         'number': receiver,
-                        'buyer': f"0{channel}",
+                        'buyer': channel,
                         'paid_at': date_and_time,
                         'payment_status': "success",
                         'reference': reference,
