@@ -1048,7 +1048,9 @@ class MTNFlexiInitiate(APIView):
                 amount = data['amount']
                 amount_to_be_deducted = prices_dict[data_volume]
                 channel = data['channel']
-
+                date = datetime.datetime.now().strftime("%a, %b %d, %Y")
+                time = datetime.datetime.now().strftime("%I:%M:%S %p")
+                date_and_time = datetime.datetime.now().isoformat()
                 if "wallet" == "wallet":
                     print("used this")
                     enough_balance = check_user_balance_against_price(data['user_id'], amount_to_be_deducted)
@@ -1099,7 +1101,7 @@ class MTNFlexiInitiate(APIView):
                         else:
                             print("it's fine")
 
-                    date_and_time = str(datetime.datetime.now())
+
 
                     data = {
                         'batch_id': "unknown",
@@ -1108,19 +1110,19 @@ class MTNFlexiInitiate(APIView):
                         'amount': amount_to_be_deducted,
                         'data_break_down': data_volume,
                         'data_volume': data_volume,
-                        'date': str(datetime.datetime.now().date()),
-                        'date_and_time': str(datetime.datetime.now()),
+                        'date': str(date),
+                        'date_and_time': str(date_and_time),
                         'done': "unknown",
                         'email': email,
                         'image': user_id,
                         'ishareBalance': '',
                         'name': f"{first_name} {last_name}",
                         'number': receiver,
-                        'paid_at': str(datetime.datetime.now()),
+                        'paid_at': str(date_and_time),
                         'reference': reference,
                         'responseCode': 200,
                         'status': "Saved",
-                        'time': str(datetime.datetime.now().time()),
+                        'time': str(time),
                         'tranxId': str(tranx_id_gen()),
                         'type': "Flexi MTN",
                         'uid': user_id
@@ -1141,7 +1143,7 @@ class MTNFlexiInitiate(APIView):
                         'color_code': "Green",
                         'created_at': date_and_time,
                         'data_volume': data_volume,
-                        'date': str(datetime.datetime.now().date()),
+                        'date': str(date),
                         'email': email,
                         'date_and_time': date_and_time,
                         'image': user_id,
@@ -1154,7 +1156,7 @@ class MTNFlexiInitiate(APIView):
                         'payment_status': "success",
                         'reference': reference,
                         'status': "Completed",
-                        'time': str(datetime.datetime.now().time()),
+                        'time': str(time),
                         'tranxId': tranx_id,
                         'type': "Flexi MTN"
                     }
