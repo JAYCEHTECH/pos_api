@@ -1121,7 +1121,7 @@ class MTNFlexiInitiate(APIView):
                         'paid_at': str(date_and_time),
                         'reference': reference,
                         'responseCode': 200,
-                        'status': "Saved",
+                        'status': "Undelivered",
                         'time': str(time),
                         'tranxId': str(tranx_id_gen()),
                         'type': "MTN Master Bundle",
@@ -1155,7 +1155,7 @@ class MTNFlexiInitiate(APIView):
                         'paid_at': date_and_time,
                         'payment_status': "success",
                         'reference': reference,
-                        'status': "Completed",
+                        'status': "Undelivered",
                         'time': str(time),
                         'tranxId': tranx_id,
                         'type': "MTN Master Bundle"
