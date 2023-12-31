@@ -945,7 +945,7 @@ class InitiateMTNTransaction(APIView):
                 'time': time,
                 'bal': bal,
                 'tranxId': tranx_id,
-                'type': "MTN Other Data"
+                'type': "MTN Master Bundle"
             }
             mtn_other.document(date_and_time).set(second_data)
             user22 = mtn_other.document(date_and_time)
@@ -1124,7 +1124,7 @@ class MTNFlexiInitiate(APIView):
                         'status': "Saved",
                         'time': str(time),
                         'tranxId': str(tranx_id_gen()),
-                        'type': "Flexi MTN",
+                        'type': "MTN Master Bundle",
                         'uid': user_id
                     }
 
@@ -1158,7 +1158,7 @@ class MTNFlexiInitiate(APIView):
                         'status': "Completed",
                         'time': str(time),
                         'tranxId': tranx_id,
-                        'type': "Flexi MTN"
+                        'type': "MTN Master Bundle"
                     }
                     mtn_other.document(date_and_time).set(second_data)
                     user22 = mtn_other.document(date_and_time)
@@ -1326,7 +1326,7 @@ def mtn_flexi_transaction(receiver, date, time, date_and_time, phone, amount, da
         'status': txn_status,
         'time': time,
         'tranxId': str(tranx_id_gen()),
-        'type': "Flexi MTN",
+        'type': "MTN Master Bundle",
         'uid': details["user_id"]
     }
 
@@ -1358,7 +1358,7 @@ def mtn_flexi_transaction(receiver, date, time, date_and_time, phone, amount, da
         'status': txn_status,
         'time': time,
         'tranxId': tranx_id,
-        'type': "MTN Other Data"
+        'type': "MTN Master Bundle"
     }
     mtn_other.document(date_and_time).set(second_data)
     user22 = mtn_other.document(date_and_time)
@@ -1542,7 +1542,7 @@ def paystack_webhook(request):
                                                                      time=time,
                                                                      amount=amount, receiver=receiver,
                                                                      reference=reference,
-                                                                     paid_at=date_and_time, txn_type="ATFlexi",
+                                                                     paid_at=date_and_time, txn_type="AT Premium Bundle",
                                                                      color_code="Green", data_volume=bundle_package,
                                                                      ishare_balance=0, txn_status=txn_status)
                     data = send_response.data
