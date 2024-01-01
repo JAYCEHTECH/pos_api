@@ -941,7 +941,7 @@ class InitiateMTNTransaction(APIView):
                 'paid_at': date_and_time,
                 'payment_status': "success",
                 'reference': reference,
-                'status': "Completed",
+                'status': "Undelivered",
                 'time': time,
                 'bal': bal,
                 'tranxId': tranx_id,
