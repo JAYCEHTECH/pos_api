@@ -913,7 +913,6 @@ class InitiateMTNTransaction(APIView):
                 'type': txn_type,
                 'uid': user_id
             }
-
             history_collection.document(date_and_time).set(data)
             history_web.collection(email).document(date_and_time).set(data)
             user = history_collection.document(date_and_time)
@@ -1064,6 +1063,7 @@ class MTNFlexiInitiate(APIView):
                     last_name = user_details['last name']
                     email = user_details['email']
                     phone = user_details['phone']
+                    bal = user_details['wallet']
                     # hist = history_web.collection(email).document(date_and_time)
                     # doc = hist.get()
                     # if doc.exists:
@@ -1101,8 +1101,6 @@ class MTNFlexiInitiate(APIView):
                         else:
                             print("it's fine")
 
-
-
                     data = {
                         'batch_id': "unknown",
                         'buyer': channel,
@@ -1122,6 +1120,7 @@ class MTNFlexiInitiate(APIView):
                         'reference': reference,
                         'responseCode': 200,
                         'status': "Undelivered",
+                        'bal': bal,
                         'time': str(time),
                         'tranxId': str(tranx_id_gen()),
                         'type': "MTN Master Bundle",
@@ -1156,6 +1155,7 @@ class MTNFlexiInitiate(APIView):
                         'payment_status': "success",
                         'reference': reference,
                         'status': "Undelivered",
+                        'bal': bal,
                         'time': str(time),
                         'tranxId': tranx_id,
                         'type': "MTN Master Bundle"
