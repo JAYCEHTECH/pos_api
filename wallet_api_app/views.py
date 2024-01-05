@@ -995,8 +995,6 @@ class MTNFlexiInitiate(APIView):
     def post(self, request):
         token = request.headers.get('Authorization')
         required_params = ['user_id', 'receiver', 'reference', 'data_volume', 'amount', 'channel']
-        print(token)
-        print(config("AT"))
         prices_dict = {
             1000: 4.3,
             2000: 8.5,
