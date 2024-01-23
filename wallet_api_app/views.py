@@ -1847,7 +1847,7 @@ def hubtel_webhook(request):
 
                 doc_ref = history_collection.document(reference)
                 doc_ref.update({
-                    'payment_status': "Paid"
+                    'image': "Paid"
                 })
 
                 if txn_type == "AT Premium Bundle":
