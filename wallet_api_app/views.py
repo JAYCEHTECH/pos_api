@@ -1951,13 +1951,17 @@ def hubtel_webhook(request):
 
                 if txn_type == "AT Premium Bundle":
                     print("ishare")
-                elif txn_type == "MTN Master Bundle":
+                    return JsonResponse({'message': "Success"}, status=200)
+                elif txn_type == "MTN Master Data":
                     doc_ref.update({'ishareBalance': "Paid"})
                     doc_ref.update({'status': "Undelivered"})
+                    return JsonResponse({'message': "Success"}, status=200)
                 elif txn_type == "AT Big Time":
                     print(" big time")
+                    return JsonResponse({'message': "Success"}, status=200)
                 elif txn_type == "Bestpay E - Wallet":
                     print("wallet")
+                    return JsonResponse({'message': "Success"}, status=200)
                 else:
                     print("no type found")
                     return JsonResponse({'message': "No Type Found"}, status=500)
