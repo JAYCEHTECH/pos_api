@@ -1790,3 +1790,73 @@ def paystack_webhook(request):
             return HttpResponse(status=401)
     else:
         return HttpResponse(status=405)
+
+
+@csrf_exempt
+def hubtel_webhook(request):
+    if request.method == 'POST':
+        try:
+            payload = request.body.decode('utf-8')
+            print("Hubtel payment Info: ", payload)
+            json_payload = json.loads(payload)
+            print(json_payload)
+
+            data = json_payload.get('Data')
+            print(data)
+            reference = data.get('ClientReference')
+            print(reference)
+            txn_status = data.get('Status')
+            amount = data.get('Amount')
+            print(txn_status, amount)
+
+            # all_data = {
+            #     'batch_id': "unknown",
+            #     'buyer': phone,
+            #     'color_code': "Green",
+            #     'amount': amount,
+            #     'data_break_down': amount,
+            #     'data_volume': bundle_package,
+            #     'date': date,
+            #     'date_and_time': date_and_time,
+            #     'done': "Success",
+            #     'email': email,
+            #     'image': user_id,
+            #     'ishareBalance': 0,
+            #     'name': f"{first_name} {last_name}",
+            #     'number': receiver,
+            #     'paid_at': date_and_time,
+            #     'reference': reference,
+            #     'responseCode': 200,
+            #     'status': txn_status,
+            #     'time': time,
+            #     'tranxId': str(tranx_id_gen()),
+            #     'type': "WALLETTOPUP",
+            #     'uid': user_id
+            # }
+
+            if txn_status == 'Success':
+                collection_saved = history_collection.document(reference).get().to_dict()
+                receiver = collection_saved['number']
+                bundle_volume = collection_saved['data_volume']
+                name = collection_saved['name']
+                email = collection_saved['email']
+                phone_number = collection_saved['buyer']
+                txn_type = collection_saved['type']
+                print(receiver, bundle_volume, name, email, phone_number)
+
+                if txn_type == "AT Premium Bundle":
+                    print("ishare")
+                if txn_type == "MTN Master Bundle":
+                    print("mtn")
+                if txn_type == "AT Big Time":
+                    print(" big time")
+                if txn_type == "Bestpay E - Wallet":
+                    print("wallet")
+                else:
+                    print("no type found")
+                    return JsonResponse({'message': "No Type Found"}, status=500)
+            else:
+                return JsonResponse({'message': 'Transaction Failed'}, status=200)
+        except Exception as e:
+            print("Error Processing hubtel webhook:", str(e))
+            return JsonResponse({'status': 'error'}, status=500)
