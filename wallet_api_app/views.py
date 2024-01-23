@@ -1860,3 +1860,6 @@ def hubtel_webhook(request):
         except Exception as e:
             print("Error Processing hubtel webhook:", str(e))
             return JsonResponse({'status': 'error'}, status=500)
+    else:
+        print("not post")
+        return JsonResponse({'message': 'Not Found'}, status=404)
