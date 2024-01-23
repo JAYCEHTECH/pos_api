@@ -1835,6 +1835,7 @@ def hubtel_webhook(request):
             # }
 
             if txn_status == 'Success':
+                print("success")
                 collection_saved = history_collection.document(reference).get().to_dict()
                 receiver = collection_saved['number']
                 bundle_volume = collection_saved['data_volume']
@@ -1844,13 +1845,18 @@ def hubtel_webhook(request):
                 txn_type = collection_saved['type']
                 print(receiver, bundle_volume, name, email, phone_number)
 
+                doc_ref = history_collection.document(reference)
+                doc_ref.update({
+                    'payment_status': "Paid"
+                })
+
                 if txn_type == "AT Premium Bundle":
                     print("ishare")
-                if txn_type == "MTN Master Bundle":
+                elif txn_type == "MTN Master Bundle":
                     print("mtn")
-                if txn_type == "AT Big Time":
+                elif txn_type == "AT Big Time":
                     print(" big time")
-                if txn_type == "Bestpay E - Wallet":
+                elif txn_type == "Bestpay E - Wallet":
                     print("wallet")
                 else:
                     print("no type found")
