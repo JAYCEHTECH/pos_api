@@ -917,6 +917,9 @@ class InitiateMTNTransaction(APIView):
             history_web.collection(email).document(date_and_time).set(data)
             user = history_collection.document(date_and_time)
             doc = user.get()
+            hist = history_collection.document(date_and_time)
+            print("first")
+            print(hist.get().to_dict())
             print(doc.to_dict())
             tranx_id = doc.to_dict()['tranxId']
             user = get_user_details(user_id)
