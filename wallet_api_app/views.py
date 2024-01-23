@@ -1401,6 +1401,103 @@ def mtn_flexi_transaction(receiver, date, time, date_and_time, phone, amount, da
     return Response(data={'code': '0000', 'message': "Transaction Saved"}, status=status.HTTP_200_OK)
 
 
+def hubtel_mtn_flexi_transaction(receiver, date, time, date_and_time, phone, amount, data_volume, details: dict, ref,
+                          channel, txn_status):
+    data = {
+        'batch_id': "unknown",
+        'buyer': phone,
+        'color_code': "Green",
+        'amount': amount,
+        'data_break_down': str(data_volume),
+        'data_volume': data_volume,
+        'date': date,
+        'date_and_time': date_and_time,
+        'done': "unknown",
+        'email': details["email"],
+        'image': details["user_id"],
+        'ishareBalance': 0,
+        'name': f"{details['first_name']} {details['last_name']}",
+        'number': receiver,
+        'paid_at': date_and_time,
+        'reference': ref,
+        'responseCode': 200,
+        'status': txn_status,
+        'time': time,
+        'tranxId': str(tranx_id_gen()),
+        'type': "MTN Master Bundle",
+        'uid': details["user_id"]
+    }
+
+    history_collection.document(date_and_time).set(data)
+    history_web.collection(details['email']).document(date_and_time).set(data)
+    user = history_collection.document(date_and_time)
+    doc = user.get()
+    print(doc.to_dict())
+    tranx_id = doc.to_dict()['tranxId']
+    second_data = {
+        'amount': amount,
+        'batch_id': "unknown",
+        'channel': channel,
+        'color_code': "Green",
+        'created_at': date_and_time,
+        'data_volume': data_volume,
+        'date': date,
+        'email': details["email"],
+        'date_and_time': date_and_time,
+        'image': details["user_id"],
+        'ip_address': "",
+        'ishareBalance': 0,
+        'name': f"{details['first_name']} {details['last_name']}",
+        'number': receiver,
+        'buyer': phone,
+        'paid_at': date_and_time,
+        'payment_status': "success",
+        'reference': ref,
+        'status': txn_status,
+        'time': time,
+        'tranxId': tranx_id,
+        'type': "MTN Master Bundle"
+    }
+    mtn_other.document(date_and_time).set(second_data)
+    user22 = mtn_other.document(date_and_time)
+    pu = user22.get()
+    print(pu.to_dict())
+    print("pu")
+    mail_doc_ref = mail_collection.document()
+    file_path = 'wallet_api_app/mtn_maill.txt'  # Replace with your file path
+
+    name = details['first_name']
+    volume = data_volume
+    date = date_and_time
+    reference_t = ref
+    receiver_t = receiver
+
+    with open(file_path, 'r') as file:
+        html_content = file.read()
+
+    placeholders = {
+        '{name}': name,
+        '{volume}': volume,
+        '{date}': date,
+        '{reference}': reference_t,
+        '{receiver}': receiver_t
+    }
+
+    for placeholder, value in placeholders.items():
+        html_content = html_content.replace(placeholder, str(value))
+
+    mail_doc_ref.set({
+        'to': details['email'],
+        'message': {
+            'subject': 'MTN Data',
+            'html': html_content,
+            'messageId': 'Bestpay'
+        }
+    })
+    print("got to redirect")
+    return Response(data={'code': '0000', 'message': "Transaction Saved"}, status=status.HTTP_200_OK)
+
+
 def big_time_transaction(receiver, date, time, date_and_time, phone, amount, data_volume, details: dict, ref,
                          channel, txn_status):
     data = {
@@ -1466,6 +1563,7 @@ def big_time_transaction(receiver, date, time, date_and_time, phone, amount, dat
         }
     })
     return Response(data={'code': '0000', 'message': "Transaction Saved"}, status=status.HTTP_200_OK)
+
 
 
 def confirm(reference):
@@ -1843,6 +1941,7 @@ def hubtel_webhook(request):
                 email = collection_saved['email']
                 phone_number = collection_saved['buyer']
                 txn_type = collection_saved['type']
+                user_id = collection_saved['uid']
                 print(receiver, bundle_volume, name, email, phone_number)
 
                 doc_ref = history_collection.document(reference)
@@ -1853,7 +1952,8 @@ def hubtel_webhook(request):
                 if txn_type == "AT Premium Bundle":
                     print("ishare")
                 elif txn_type == "MTN Master Bundle":
-                    print("mtn")
+                    doc_ref.update({'ishareBalance': "Paid"})
+                    doc_ref.update({'status': "Undelivered"})
                 elif txn_type == "AT Big Time":
                     print(" big time")
                 elif txn_type == "Bestpay E - Wallet":
