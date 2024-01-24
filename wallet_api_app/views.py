@@ -1304,6 +1304,75 @@ def webhook_send_and_save_to_history(user_id, txn_type: str, paid_at: str, ishar
         status=status.HTTP_200_OK)
 
 
+def hubtel_webhook_send_and_save_to_history(saved_data, user_id, reference, receiver, data_volume):
+    user_details = get_user_details(user_id)
+    first_name = user_details['first name']
+    last_name = user_details['last name']
+    email = user_details['email']
+    phone = user_details['phone']
+
+    doc_ref = history_web.collection(email).document(reference)
+    if doc_ref.get().exists:
+        data = doc_ref.get()
+        data_dict = data.to_dict()
+        batch_id = data_dict["batch_id"]
+        if batch_id != "unknown":
+            ishare_verification_response = ishare_verification(batch_id)
+            if ishare_verification_response is not False:
+                code = \
+                    ishare_verification_response["flexiIshareTranxStatus"]["flexiIshareTranxStatusResult"][
+                        "apiResponse"][
+                        "responseCode"]
+                ishare_response = \
+                    ishare_verification_response["flexiIshareTranxStatus"]["flexiIshareTranxStatusResult"][
+                        "ishareApiResponseData"][
+                        "apiResponseData"][
+                        0][
+                        "responseMsg"]
+                print(code)
+                print(ishare_response)
+                if code == '200' or ishare_response == 'Crediting Successful.':
+                    return Response(data={"code": "0002"}, status=status.HTTP_200_OK)
+                else:
+                    pass
+        else:
+            pass
+    else:
+        pass
+    print("moving on")
+    data = saved_data
+    history_web.collection(email).document(reference).set(data)
+
+    if history_collection.document(reference).get().exists:
+        print("first save")
+
+    ishare_response, status_code = send_ishare_bundle(first_name=first_name, last_name=last_name, receiver=receiver,
+                                                      buyer=phone,
+                                                      bundle=data_volume,
+                                                      email=email, reference=reference)
+    json_response = ishare_response.json()
+    print(f"hello:{json_response}")
+    status_code = status_code
+    print(status_code)
+    try:
+        batch_id = json_response["batch_id"]
+    except KeyError:
+        batch_id = "unknown"
+    print(batch_id)
+
+    doc_ref = history_collection.document(reference)
+    if doc_ref.get().exists:
+        doc_ref.update({'batch_id': batch_id, 'responseCode': status_code})
+        history_web.collection(email).document(reference).update({'batch_id': batch_id, 'responseCode': status_code})
+    else:
+        print("didn't find any entry to update")
+    print("firebase saved")
+    # return status_code, batch_id if batch_id else "No batchId", email, first_name
+    return Response(
+        data=json_response,
+        status=status.HTTP_200_OK)
+
+
 def mtn_flexi_transaction(receiver, date, time, date_and_time, phone, amount, data_volume, details: dict, ref,
                           channel, txn_status):
     data = {
@@ -1943,8 +2012,83 @@ def hubtel_webhook(request):
                 doc_ref = history_collection.document(reference)
 
                 if txn_type == "AT Premium Bundle":
-                    print("ishare")
-                    return JsonResponse({'message': "Success"}, status=200)
+                    doc_ref.update({'ishareBalance': "Paid", 'status': "Undelivered"})
+                    user_details = get_user_details(user_id)
+                    if user_details is not None:
+                        first_name = user_details['first name']
+                        last_name = user_details['last name']
+                        email = user_details['email']
+                        phone = user_details['phone']
+                    else:
+                        first_name = ""
+                        last_name = ""
+                        email = ""
+                        phone = ""
+                    collection_saved = history_collection.document(reference).get().to_dict()
+                    send_response = hubtel_webhook_send_and_save_to_history(collection_saved, user_id, reference, receiver, bundle_volume)
+                    # saved_data, user_id, reference, receiver, data_volume
+                    data = send_response.data
+                    json_response = data
+                    print(json_response)
+                    if json_response["code"] == "0002":
+                        return HttpResponse(status=200)
+                    elif json_response["code"] == "0001":
+                        return HttpResponse(status=500)
+                    else:
+                        print(send_response.status_code)
+                        try:
+                            batch_id = json_response["batch_id"]
+                        except KeyError:
+                            return HttpResponse(status=500)
+
+                        print(batch_id)
+
+                        if json_response["code"] == '0000':
+                            sms = f"Hey there\nYour account has been credited with {bundle_volume}MB.\nConfirm your new balance using the AT Mobile App"
+                            r_sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to={receiver}&from=InternetHub&sms={sms}"
+                            response = requests.request("GET", url=r_sms_url)
+                            doc_ref = history_collection.document(date_and_time)
+                            if doc_ref.get().exists:
+                                doc_ref.update({'done': 'Successful'})
+                            else:
+                                print("no entry")
+                            mail_doc_ref = mail_collection.document(f"{batch_id}-Mail")
+                            file_path = 'wallet_api_app/mail.txt'  # Replace with your file path
+
+                            name = first_name
+                            volume = bundle_volume
+                            date = date_and_time
+                            reference_t = reference
+                            receiver_t = receiver
+
+                            with open(file_path, 'r') as file:
+                                html_content = file.read()
+
+                            placeholders = {
+                                '{name}': name,
+                                '{volume}': volume,
+                                '{date}': date,
+                                '{reference}': reference_t,
+                                '{receiver}': receiver_t
+                            }
+
+                            for placeholder, value in placeholders.items():
+                                html_content = html_content.replace(placeholder, str(value))
+
+                            mail_doc_ref.set({
+                                'to': email,
+                                'message': {
+                                    'subject': 'AT Flexi Bundle',
+                                    'html': html_content,
+                                    'messageId': 'Bestpay'
+                                }
+                            })
+                            print("donnee")
+                            return JsonResponse({'message': "Success"}, status=200)
+                        else:
+                            doc_ref = history_collection.document(date_and_time)
+                            doc_ref.update({'done': 'Failed'})
+                            return JsonResponse({'message': "Success"}, status=200)
                 elif txn_type == "MTN Master Data":
                     doc_ref.update({'ishareBalance': "Paid", 'status': "Undelivered"})
                     user_details = get_user_details(user_id)
