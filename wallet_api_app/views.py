@@ -558,7 +558,7 @@ class WalletUserBalance(APIView):
             })
 
             sms_message = f"GHS {to_be_added} was deposited in your wallet. Available balance is now GHS {new_balance}"
-            sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to=0{user_details['phone']}&from=InternetHub&sms={sms_message}"
+            sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to=0{user_details['phone']}&from=Bestpay&sms={sms_message}"
             response = requests.request("GET", url=sms_url)
             print(response.status_code)
             return redirect(f"https://{callback_url}")
@@ -644,7 +644,7 @@ class InitiateTransaction(APIView):
                 print(ishare_response)
                 if code == '200' or ishare_response == 'Crediting Successful.':
                     sms = f"Hey there\nYour account has been credited with {data_volume}MB.\nConfirm your new balance using the AT Mobile App"
-                    r_sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to={receiver}&from=InternetHub&sms={sms}"
+                    r_sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to={receiver}&from=Bestpay&sms={sms}"
                     response = requests.request("GET", url=r_sms_url)
                     print(response.text)
                     doc_ref = history_collection.document(date_and_time)
@@ -1726,7 +1726,7 @@ def paystack_webhook(request):
 
                         if json_response["code"] == '0000':
                             sms = f"Hey there\nYour account has been credited with {bundle_package}MB.\nConfirm your new balance using the AT Mobile App"
-                            r_sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to={receiver}&from=InternetHub&sms={sms}"
+                            r_sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to={receiver}&from=Bestpay&sms={sms}"
                             response = requests.request("GET", url=r_sms_url)
                             doc_ref = history_collection.document(date_and_time)
                             if doc_ref.get().exists:
@@ -1940,7 +1940,7 @@ def paystack_webhook(request):
                     })
 
                     sms_message = f"GHS {to_be_added} was deposited in your wallet. Available balance is now GHS {new_balance}"
-                    sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to=0{user_details['phone']}&from=InternetHub&sms={sms_message}"
+                    sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to=0{user_details['phone']}&from=Bestpay&sms={sms_message}"
                     response = requests.request("GET", url=sms_url)
                     print(response.status_code)
                     return HttpResponse(status=200)
@@ -2046,7 +2046,7 @@ def hubtel_webhook(request):
                         if json_response["code"] == '0000':
                             doc_ref.update({'ishareBalance': "Paid", 'status': "Delivered"})
                             sms = f"Hey there\nYour account has been credited with {bundle_volume}MB.\nConfirm your new balance using the AT Mobile App"
-                            r_sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to={receiver}&from=InternetHub&sms={sms}"
+                            r_sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to={receiver}&from=Bestpay&sms={sms}"
                             response = requests.request("GET", url=r_sms_url)
                             doc_ref = history_collection.document(date_and_time)
                             if doc_ref.get().exists:
@@ -2217,7 +2217,7 @@ def hubtel_webhook(request):
                     })
 
                     sms_message = f"GHS {to_be_added} was deposited in your wallet. Available balance is now GHS {new_balance}"
-                    sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to=0{user_details['phone']}&from=InternetHub&sms={sms_message}"
+                    sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to=0{user_details['phone']}&from=Bestpay&sms={sms_message}"
                     response = requests.request("GET", url=sms_url)
                     print(response.status_code)
                     return JsonResponse({'message': "Success"}, status=200)
