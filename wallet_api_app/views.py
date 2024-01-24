@@ -2012,7 +2012,7 @@ def hubtel_webhook(request):
                 doc_ref = history_collection.document(reference)
 
                 if txn_type == "AT Premium Bundle":
-                    doc_ref.update({'ishareBalance': "Paid", 'status': "Undelivered"})
+                    doc_ref.update({'ishareBalance': "Paid", 'status': "Undelivered", "tranxId": str(tranx_id_gen())})
                     user_details = get_user_details(user_id)
                     if user_details is not None:
                         first_name = user_details['first name']
@@ -2044,6 +2044,7 @@ def hubtel_webhook(request):
                         print(batch_id)
 
                         if json_response["code"] == '0000':
+                            doc_ref.update({'ishareBalance': "Paid", 'status': "Delivered"})
                             sms = f"Hey there\nYour account has been credited with {bundle_volume}MB.\nConfirm your new balance using the AT Mobile App"
                             r_sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to={receiver}&from=InternetHub&sms={sms}"
                             response = requests.request("GET", url=r_sms_url)
@@ -2090,7 +2091,7 @@ def hubtel_webhook(request):
                             doc_ref.update({'done': 'Failed'})
                             return JsonResponse({'message': "Success"}, status=200)
                 elif txn_type == "MTN Master Data":
-                    doc_ref.update({'ishareBalance': "Paid", 'status': "Undelivered"})
+                    doc_ref.update({'ishareBalance': "Paid", 'status': "Undelivered", "tranxId": str(tranx_id_gen())})
                     user_details = get_user_details(user_id)
                     if user_details is not None:
                         first_name = user_details['first name']
@@ -2120,7 +2121,7 @@ def hubtel_webhook(request):
                     else:
                         return JsonResponse({'message': "Success"}, status=200)
                 elif txn_type == "AT Big Time":
-                    doc_ref.update({'ishareBalance': "Paid", 'status': "Undelivered"})
+                    doc_ref.update({'ishareBalance': "Paid", 'status': "Undelivered", "tranxId": str(tranx_id_gen())})
                     user_details = get_user_details(user_id)
                     if user_details is not None:
                         first_name = user_details['first name']
@@ -2147,7 +2148,7 @@ def hubtel_webhook(request):
                     else:
                         return HttpResponse(status=500)
                 elif txn_type == "Bestpay E - Wallet":
-                    doc_ref.update({'ishareBalance': "Paid", 'status': "Credited"})
+                    doc_ref.update({'ishareBalance': "Paid", 'status': "Credited", "tranxId": str(tranx_id_gen())})
                     user_details = get_user_details(user_id)
                     collection_saved = history_collection.document(reference).get().to_dict()
                     if user_details is not None:
