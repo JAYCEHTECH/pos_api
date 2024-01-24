@@ -2225,6 +2225,8 @@ def hubtel_webhook(request):
                     print("no type found")
                     return JsonResponse({'message': "No Type Found"}, status=500)
             else:
+                doc_ref = history_collection.document(reference)
+                doc_ref.update({'status': "Failed"})
                 return JsonResponse({'message': 'Transaction Failed'}, status=200)
         except Exception as e:
             print("Error Processing hubtel webhook:", str(e))
