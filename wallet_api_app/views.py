@@ -2240,11 +2240,6 @@ def hubtel_webhook(request):
 
 @csrf_exempt
 def export_unknown_transactions(request):
-    # Replace 'your-firebase-url' and 'your-collection' with your Firebase details
-    firebase_url = 'https://your-firebase-url.firebaseio.com'
-    collection_name = 'your-collection'
-
-    # Fetch data from Firebase
     documents = history_collection.stream()
 
     # Process transactions with unknown batch_id
