@@ -2254,23 +2254,26 @@ def export_unknown_transactions(request):
             transaction = doc.to_dict()
             unknown_transactions.append(transaction)
             counter += 1
-        else:
-            # Create a DataFrame from the selected transactions
-            df = pd.DataFrame(unknown_transactions)
 
-            # Export to Excel
-            excel_buffer = BytesIO()
-            with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
-                df.to_excel(writer, sheet_name='Sheet1', index=False)
+    print(f"Total transactions to export: {len(unknown_transactions)}")
 
-            excel_buffer.seek(0)
+    # Create a DataFrame from the selected transactions
+    df = pd.DataFrame(unknown_transactions)
 
-            # Create a response with the Excel file
-            response = HttpResponse(excel_buffer.read(),
-                                    content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            response['Content-Disposition'] = 'attachment; filename=unknown_transactions.xlsx'
+    # Export to Excel
+    excel_buffer = BytesIO()
+    with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
+        df.to_excel(writer, sheet_name='Sheet1', index=False)
 
-            return response
+    excel_buffer.seek(0)
+
+    # Create a response with the Excel file
+    response = HttpResponse(excel_buffer.read(),
+                            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=unknown_transactions.xlsx'
+
+    return response
+
 
 
 
