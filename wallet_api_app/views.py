@@ -2243,35 +2243,35 @@ def hubtel_webhook(request):
 def export_unknown_transactions(request):
     documents = history_collection.stream()
     print("here")
+
     # Process transactions with unknown batch_id
     counter = 0
     unknown_transactions = []
+
     for doc in documents:
         print(counter)
         if counter < 10:
             transaction = doc.to_dict()
-            # batch_id = transaction.get('batch_id', None)
-            # if batch_id is None or batch_id.lower() == 'unknown':
             unknown_transactions.append(transaction)
-            counter = counter + 1
+            counter += 1
 
     # Create a DataFrame from the selected transactions
-            # Create a DataFrame from the selected transactions
-        df = pd.DataFrame(unknown_transactions)
+    df = pd.DataFrame(unknown_transactions)
 
-        # Export to Excel
-        excel_buffer = BytesIO()
-        with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
-            df.to_excel(writer, sheet_name='Sheet1', index=False)
+    # Export to Excel
+    excel_buffer = BytesIO()
+    with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
+        df.to_excel(writer, sheet_name='Sheet1', index=False)
 
-        excel_buffer.seek(0)
+    excel_buffer.seek(0)
 
-        # Create a response with the Excel file
-        response = HttpResponse(excel_buffer.read(),
-                                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename=unknown_transactions.xlsx'
+    # Create a response with the Excel file
+    response = HttpResponse(excel_buffer.read(),
+                            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=unknown_transactions.xlsx'
 
-        return response
+    return response
+
 
 
 
