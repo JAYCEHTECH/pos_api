@@ -2240,15 +2240,18 @@ def hubtel_webhook(request):
 
 @csrf_exempt
 def export_unknown_transactions(request):
-    documents = history_collection.stream()
+    documents = mtn_history.stream()
 
     # Process transactions with unknown batch_id
+    counter = 0
     unknown_transactions = []
     for doc in documents:
-        transaction = doc.to_dict()
-        batch_id = transaction.get('batch_id', None)
-        if batch_id is None or batch_id.lower() == 'unknown':
-            unknown_transactions.append(transaction)
+        if counter < 10:
+            transaction = doc.to_dict()
+            batch_id = transaction.get('batch_id', None)
+            if batch_id is None or batch_id.lower() == 'unknown':
+                unknown_transactions.append(transaction)
+                counter += 1
 
     # Create a DataFrame from the selected transactions
     df = pd.DataFrame(unknown_transactions)
