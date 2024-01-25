@@ -2241,11 +2241,12 @@ def hubtel_webhook(request):
 @csrf_exempt
 def export_unknown_transactions(request):
     documents = mtn_history.stream()
-
+    print("here")
     # Process transactions with unknown batch_id
     counter = 0
     unknown_transactions = []
     for doc in documents:
+        print(doc)
         if counter < 10:
             transaction = doc.to_dict()
             batch_id = transaction.get('batch_id', None)
