@@ -2276,7 +2276,7 @@ def export_unknown_transactions(request):
                             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=unknown_transactions.xlsx'
 
-    return JsonResponse({"message": "Hello"})
+    return response
 
 
 
