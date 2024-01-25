@@ -2251,9 +2251,9 @@ def export_unknown_transactions(request):
         if counter < 10:
             transaction = doc.to_dict()
             batch_id = transaction.get('batch_id', None)
-            if batch_id is None or batch_id.lower() == 'unknown':
-                unknown_transactions.append(transaction)
-                counter = counter + 1
+            # if batch_id is None or batch_id.lower() == 'unknown':
+            unknown_transactions.append(transaction)
+            counter = counter + 1
 
     # Create a DataFrame from the selected transactions
     df = pd.DataFrame(unknown_transactions)
