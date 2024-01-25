@@ -2251,10 +2251,12 @@ def export_unknown_transactions(request):
     for doc in documents:
         print(counter)
         transaction = doc.to_dict()
-        unknown_transactions.append(transaction)
+        batch_id = transaction.get('batch_id', None)
+        if batch_id is None or batch_id.lower() == 'unknown':
+            unknown_transactions.append(transaction)
         counter += 1
 
-        if counter >= 10:
+        if counter >= 30:
             break  # Break out of the loop after collecting 10 transactions
 
     print(f"Total transactions to export: {len(unknown_transactions)}")
@@ -2274,7 +2276,7 @@ def export_unknown_transactions(request):
                             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=unknown_transactions.xlsx'
 
-    return response
+    return JsonResponse({"message": "Hello"})
 
 
 
