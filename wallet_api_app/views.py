@@ -6,6 +6,7 @@ import random
 import secrets
 from time import sleep
 
+import pandas as pd
 import requests
 from decouple import config
 from django.http import JsonResponse, HttpResponse
@@ -2233,3 +2234,37 @@ def hubtel_webhook(request):
     else:
         print("not post")
         return JsonResponse({'message': 'Not Found'}, status=404)
+
+
+# In your Django views.py file
+
+@csrf_exempt
+def export_unknown_transactions():
+    # Replace 'your-firebase-url' and 'your-collection' with your Firebase details
+    firebase_url = 'https://your-firebase-url.firebaseio.com'
+    collection_name = 'your-collection'
+
+    # Fetch data from Firebase
+    documents = history_collection.stream()
+
+    # Process transactions with unknown batch_id
+    unknown_transactions = []
+    for doc in documents:
+        transaction = doc.to_dict()
+        batch_id = transaction.get('batch_id', None)
+        if batch_id is None or batch_id.lower() == 'unknown':
+            unknown_transactions.append(transaction)
+
+    # Create a DataFrame from the selected transactions
+    df = pd.DataFrame(unknown_transactions)
+
+    # Export to Excel
+    excel_content = df.to_excel(index=False)
+
+    # Create a response with the Excel file
+    response = HttpResponse(excel_content,
+                            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=unknown_transactions.xlsx'
+
+    return response
+

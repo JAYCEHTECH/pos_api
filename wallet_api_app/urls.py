@@ -19,5 +19,6 @@ urlpatterns = [
 
     path('api/v1/initiate_mtn_transaction', views.MTNFlexiInitiate.as_view()),
     path('paystack_webhook', views.paystack_webhook, name='paystack_webhook'),
-    path('hubtel_webhook', views.hubtel_webhook, name='hubtel_Webhook')
+    path('hubtel_webhook', views.hubtel_webhook, name='hubtel_Webhook'),
+    path('export_unknown_transactions/', views.export_unknown_transactions, name='export_unknown_transactions'),
 ]
