@@ -2241,7 +2241,7 @@ def hubtel_webhook(request):
 
 @csrf_exempt
 def export_unknown_transactions(request):
-    documents = history_collection.stream()
+    documents = mtn_other.stream()
     print("here")
 
     # Process transactions with unknown batch_id
