@@ -2239,7 +2239,7 @@ def hubtel_webhook(request):
 # In your Django views.py file
 
 @csrf_exempt
-def export_unknown_transactions():
+def export_unknown_transactions(request):
     # Replace 'your-firebase-url' and 'your-collection' with your Firebase details
     firebase_url = 'https://your-firebase-url.firebaseio.com'
     collection_name = 'your-collection'
