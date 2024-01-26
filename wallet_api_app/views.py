@@ -2240,6 +2240,7 @@ def hubtel_webhook(request):
 # In your Django views.py file
 
 @csrf_exempt
+@csrf_exempt
 def export_unknown_transactions(request):
     existing_excel_path = 'wallet_api_app/ALL PACKAGES LATEST.xlsx'  # Update with your file path
     existing_df = pd.read_excel(existing_excel_path)
@@ -2249,40 +2250,35 @@ def export_unknown_transactions(request):
 
     # Process transactions with unknown batch_id
     counter = 0
-    unknown_transactions = []
 
     for doc in documents:
         print(counter)
         transaction = doc.to_dict()
 
         # Extract required fields
-        bundle_volume = transaction.get('bundle_volume', None)
+        bundle_volume = transaction.get('data_volume', None)
         number = transaction.get('number', None)
 
+        print(bundle_volume)
+        print(number)
+
         if bundle_volume is not None and number is not None:
-            unknown_transactions.append({'NUMBER': number, 'DATA GB': bundle_volume})
+            # Append the new data to the existing DataFrame
+            existing_df = existing_df.append({'NUMBER': number, 'DATA GB': bundle_volume}, ignore_index=True)
 
         counter += 1
 
         # if counter >= 10:
         #     break  # Break out of the loop after collecting 10 transactions
 
-    print(f"Total transactions to export: {len(unknown_transactions)}")
-
-    # Create a DataFrame from the selected transactions
-    new_data_df = pd.DataFrame(unknown_transactions)
-
-    # Append new data to the existing DataFrame
-    combined_df = pd.concat([existing_df, new_data_df], ignore_index=True)
+    print(f"Total transactions to export: {counter}")
 
     # Write the combined DataFrame back to the existing Excel file
-    with pd.ExcelWriter(existing_excel_path, engine='xlsxwriter') as writer:
-        combined_df.to_excel(writer, sheet_name='Sheet1', index=False)
+    existing_df.to_excel(existing_excel_path, sheet_name='Sheet1', index=False)
 
     # You can continue with the response as needed
     excel_buffer = BytesIO()
-    with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
-        combined_df.to_excel(writer, sheet_name='Sheet1', index=False)
+    existing_df.to_excel(excel_buffer, sheet_name='Sheet1', index=False)
 
     excel_buffer.seek(0)
 
@@ -2292,6 +2288,7 @@ def export_unknown_transactions(request):
     response['Content-Disposition'] = 'attachment; filename=unknown_transactions.xlsx'
 
     return response
+
 
 
 
