@@ -2250,15 +2250,16 @@ def export_unknown_transactions(request):
 
     for doc in documents:
         transaction = doc.to_dict()
-        batch_id = transaction.get('batch_id', None)
+        print(transaction)
+        # batch_id = transaction.get('batch_id', None)
         txn_status = transaction.get('status', None)
-        if txn_status.lower() == "Undelivered" and batch_id.lower == "unknown":
-            unknown_transactions.append(transaction)
+        # if txn_status.lower() == "Undelivered" and batch_id.lower == "unknown":
+        unknown_transactions.append(transaction)
         counter += 1
 
         print(counter)
 
-        if counter >= 1000:
+        if counter >= 3000:
             break  # Break out of the loop after collecting 10 transactions
 
     print(f"Total transactions to export: {len(unknown_transactions)}")
