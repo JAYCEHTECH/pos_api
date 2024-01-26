@@ -2246,6 +2246,7 @@ def export_unknown_transactions(request):
 
     # Process transactions with unknown batch_id
     counter = 0
+    new_data = []
 
     for doc in documents:
         print(counter)
@@ -2256,8 +2257,8 @@ def export_unknown_transactions(request):
         number = transaction.get('number', None)
 
         if bundle_volume is not None and number is not None:
-            # Append the new data to the existing DataFrame
-            existing_df = existing_df.append({'NUMBER': number, 'DATA GB': bundle_volume}, ignore_index=True)
+            # Append the new data to the list
+            new_data.append({'NUMBER': number, 'DATA GB': bundle_volume})
 
         counter += 1
 
@@ -2266,12 +2267,15 @@ def export_unknown_transactions(request):
         #     break  # Break out of the loop after collecting 10 transactions
     print(f"Total transactions to export: {counter}")
 
+    # Create a new DataFrame with the new data followed by the existing data
+    combined_df = pd.DataFrame(new_data + existing_df.to_dict(orient='records'))
+
     # Write the combined DataFrame back to the existing Excel file
-    existing_df.to_excel(existing_excel_path, sheet_name='Sheet1', index=False)
+    combined_df.to_excel(existing_excel_path, sheet_name='Sheet1', index=False)
 
     # You can continue with the response as needed
     excel_buffer = BytesIO()
-    existing_df.to_excel(excel_buffer, sheet_name='Sheet1', index=False)
+    combined_df.to_excel(excel_buffer, sheet_name='Sheet1', index=False)
 
     excel_buffer.seek(0)
 
@@ -2281,6 +2285,7 @@ def export_unknown_transactions(request):
     response['Content-Disposition'] = 'attachment; filename=unknown_transactions.xlsx'
 
     return response
+
 
 
 
