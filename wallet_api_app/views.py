@@ -2254,9 +2254,9 @@ def export_unknown_transactions(request):
         txn_status = transaction.get('status', None)
         if txn_status.lower() == "Undelivered":
             unknown_transactions.append(transaction)
-            counter += 1
+        counter += 1
 
-        if counter >= 200:
+        if counter >= 300:
             break  # Break out of the loop after collecting 10 transactions
 
     print(f"Total transactions to export: {len(unknown_transactions)}")
