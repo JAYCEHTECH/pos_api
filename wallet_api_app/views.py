@@ -2241,7 +2241,7 @@ def hubtel_webhook(request):
 
 @csrf_exempt
 def export_unknown_transactions(request):
-    existing_excel_path = '/ALL PACKAGES LATEST.xlsx'  # Update with your file path
+    existing_excel_path = 'wallet_api_app/ALL PACKAGES LATEST.xlsx'  # Update with your file path
     existing_df = pd.read_excel(existing_excel_path)
 
     documents = history_collection.where("batch_id", "==", "unknown").stream()
