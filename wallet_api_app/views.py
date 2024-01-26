@@ -2268,7 +2268,7 @@ def export_unknown_transactions(request):
         number = transaction.get('number', 0)  # Assuming a default of 0 if number is missing
 
         # Convert data_volume from MB to GB
-        bundle_volume_gb = float(bundle_volume_mb) / 1024
+        bundle_volume_gb = round(float(bundle_volume_mb) / 1000)
 
         # Get the active sheet
         sheet = writer.sheets['Sheet1']
