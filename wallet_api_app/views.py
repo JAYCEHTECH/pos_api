@@ -2241,6 +2241,7 @@ def hubtel_webhook(request):
 from openpyxl import load_workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 
+
 from openpyxl import load_workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 
@@ -2265,10 +2266,10 @@ def export_unknown_transactions(request):
 
         # Extract required fields
         bundle_volume_mb = transaction.get('data_volume', 0)  # Assuming a default of 0 if data_volume is missing
-        number = transaction.get('number', 0)  # Assuming a default of 0 if number is missing
+        number = str(transaction.get('number', 0))  # Convert to string to keep leading zeros
 
         # Convert data_volume from MB to GB
-        bundle_volume_gb = round(float(bundle_volume_mb) / 1000)
+        bundle_volume_gb = round(bundle_volume_mb / 1024)
 
         # Get the active sheet
         sheet = writer.sheets['Sheet1']
@@ -2277,7 +2278,7 @@ def export_unknown_transactions(request):
         target_row = 2 + counter  # Assuming the data starts from row 2
 
         # Populate the specific cells with the new data
-        sheet.cell(row=target_row, column=1, value=int(number))  # Convert to integer
+        sheet.cell(row=target_row, column=1, value=number)  # Keep leading zeros
         sheet.cell(row=target_row, column=2, value=float(bundle_volume_gb))  # Convert to float
 
         counter += 1
