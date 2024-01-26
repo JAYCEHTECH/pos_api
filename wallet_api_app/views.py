@@ -2239,9 +2239,7 @@ def hubtel_webhook(request):
 # In your Django views.py file
 
 from openpyxl import load_workbook
-
-
-from openpyxl import load_workbook
+from openpyxl.utils.dataframe import dataframe_to_rows
 
 @csrf_exempt
 def export_unknown_transactions(request):
@@ -2270,8 +2268,12 @@ def export_unknown_transactions(request):
             # Get the active sheet
             sheet = writer.sheets['Sheet1']
 
-            # Append the new data to the existing sheet
-            sheet.append([number, bundle_volume])
+            # Find the row index where you want to populate the data (adjust as needed)
+            target_row = 2 + counter  # Assuming the data starts from row 2
+
+            # Populate the specific cells with the new data
+            sheet.cell(row=target_row, column=1, value=number)  # Assuming 'number' goes to column A
+            sheet.cell(row=target_row, column=2, value=bundle_volume)  # Assuming 'bundle_volume' goes to column B
 
         counter += 1
 
@@ -2297,4 +2299,5 @@ def export_unknown_transactions(request):
     response['Content-Disposition'] = 'attachment; filename=unknown_transactions.xlsx'
 
     return response
+
 
