@@ -2269,7 +2269,7 @@ def export_unknown_transactions(request):
         number = str(transaction.get('number', 0))  # Convert to string to keep leading zeros
 
         # Convert data_volume from MB to GB
-        bundle_volume_gb = round(bundle_volume_mb / 1024)
+        bundle_volume_gb = round(float(bundle_volume_mb) / 1024)
 
         # Get the active sheet
         sheet = writer.sheets['Sheet1']
