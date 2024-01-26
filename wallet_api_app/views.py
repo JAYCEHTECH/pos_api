@@ -1293,7 +1293,8 @@ def webhook_send_and_save_to_history(user_id, txn_type: str, paid_at: str, ishar
     doc_ref = history_collection.document(date_and_time)
     if doc_ref.get().exists:
         doc_ref.update({'batch_id': batch_id, 'responseCode': status_code})
-        history_web.collection(email).document(date_and_time).update({'batch_id': batch_id, 'responseCode': status_code})
+        history_web.collection(email).document(date_and_time).update(
+            {'batch_id': batch_id, 'responseCode': status_code})
     else:
         print("didn't find any entry to update")
     print("firebase saved")
@@ -1470,7 +1471,6 @@ def mtn_flexi_transaction(receiver, date, time, date_and_time, phone, amount, da
 
 
 def hubtel_mtn_flexi_transaction(saved_data, reference, email, data_volume, date_and_time, receiver, first_name):
-
     history_collection.document(reference).set(saved_data)
     history_web.collection(email).document(reference).set(saved_data)
     user = history_collection.document(reference)
@@ -1628,7 +1628,6 @@ def hubtel_big_time_transaction(saved_data, reference, email, data_volume, date_
     return Response(data={'code': '0000', 'message': "Transaction Saved"}, status=status.HTTP_200_OK)
 
 
-
 def confirm(reference):
     import requests
 
@@ -1697,14 +1696,14 @@ def paystack_webhook(request):
                     first_name = ""
                     email = ""
 
-
                 if channel == "ishare":
                     send_response = webhook_send_and_save_to_history(user_id=user_id, date_and_time=date_and_time,
                                                                      date=date,
                                                                      time=time,
                                                                      amount=amount, receiver=receiver,
                                                                      reference=reference,
-                                                                     paid_at=date_and_time, txn_type="AT Premium Bundle",
+                                                                     paid_at=date_and_time,
+                                                                     txn_type="AT Premium Bundle",
                                                                      color_code="Green", data_volume=bundle_package,
                                                                      ishare_balance=0, txn_status=txn_status)
                     data = send_response.data
@@ -2024,7 +2023,8 @@ def hubtel_webhook(request):
                         email = ""
                         phone = ""
                     collection_saved = history_collection.document(reference).get().to_dict()
-                    send_response = hubtel_webhook_send_and_save_to_history(collection_saved, user_id, reference, receiver, bundle_volume)
+                    send_response = hubtel_webhook_send_and_save_to_history(collection_saved, user_id, reference,
+                                                                            receiver, bundle_volume)
                     # saved_data, user_id, reference, receiver, data_volume
                     data = send_response.data
                     json_response = data
@@ -2108,7 +2108,8 @@ def hubtel_webhook(request):
                         'user_id': user_id
                     }
                     collection_saved = history_collection.document(reference).get().to_dict()
-                    mtn_response = hubtel_mtn_flexi_transaction(collection_saved, reference, email, bundle_volume, date_and_time, receiver, first_name)
+                    mtn_response = hubtel_mtn_flexi_transaction(collection_saved, reference, email, bundle_volume,
+                                                                date_and_time, receiver, first_name)
                     print(mtn_response)
                     # saved_data, reference, email, data_volume, date_and_time, receiver, first_name
                     print("after mtn responses")
@@ -2138,7 +2139,8 @@ def hubtel_webhook(request):
                         'user_id': user_id
                     }
                     collection_saved = history_collection.document(reference).get().to_dict()
-                    big_time_response = hubtel_big_time_transaction(collection_saved, reference, email, bundle_volume, date_and_time, receiver, first_name)
+                    big_time_response = hubtel_big_time_transaction(collection_saved, reference, email, bundle_volume,
+                                                                    date_and_time, receiver, first_name)
                     # saved_data, reference, email, data_volume, date_and_time, receiver, first_name
                     if big_time_response.status_code == 200 or big_time_response.data["code"] == "0000":
                         print("big time donnnneee")
@@ -2236,46 +2238,52 @@ def hubtel_webhook(request):
 
 # In your Django views.py file
 
+from openpyxl import load_workbook
+
+
 @csrf_exempt
 def export_unknown_transactions(request):
     existing_excel_path = 'wallet_api_app/ALL PACKAGES LATEST.xlsx'  # Update with your file path
-    existing_df = pd.read_excel(existing_excel_path)
+
+    # Load the existing Excel file
+    book = load_workbook(existing_excel_path)
+    writer = pd.ExcelWriter(existing_excel_path, engine='openpyxl')
+    writer.book = book
 
     documents = mtn_other.where("batch_id", "==", "unknown").stream()
     print("here")
 
     # Process transactions with unknown batch_id
     counter = 0
-    new_data = []
 
     for doc in documents:
         print(counter)
         transaction = doc.to_dict()
 
-        # Explicitly specify the fields you want
+        # Extract required fields
         bundle_volume = transaction.get('data_volume', None)
         number = transaction.get('number', None)
 
         if bundle_volume is not None and number is not None:
-            # Append the new data to the list
-            new_data.append({'NUMBER': number, 'DATA GB': bundle_volume})
+            # Append the new data to the existing DataFrame
+            new_data_df = pd.DataFrame({'NUMBER': [number], 'DATA GB': [bundle_volume]})
+            new_data_df.to_excel(writer, index=False, header=False, startrow=1)
 
         counter += 1
 
         # Uncomment the following lines if you want to limit to 10 transactions
         # if counter >= 10:
         #     break  # Break out of the loop after collecting 10 transactions
+
     print(f"Total transactions to export: {counter}")
 
-    # Create a new DataFrame with the new data followed by the existing data
-    combined_df = pd.DataFrame(new_data + existing_df.to_dict(orient='records'))
-
-    # Write the combined DataFrame back to the existing Excel file
-    combined_df.to_excel(existing_excel_path, sheet_name='Sheet1', index=False)
+    # Save changes to the existing Excel file
+    writer.save()
 
     # You can continue with the response as needed
     excel_buffer = BytesIO()
-    combined_df.to_excel(excel_buffer, sheet_name='Sheet1', index=False)
+    writer.close()
+    book.save(excel_buffer)
 
     excel_buffer.seek(0)
 
@@ -2285,16 +2293,3 @@ def export_unknown_transactions(request):
     response['Content-Disposition'] = 'attachment; filename=unknown_transactions.xlsx'
 
     return response
-
-
-
-
-
-
-
-
-
-
-
-
-
