@@ -2259,8 +2259,7 @@ def export_unknown_transactions(request):
 
         print(counter)
 
-        if counter >= 3000:
-            break  # Break out of the loop after collecting 10 transactions
+# Break out of the loop after collecting 10 transactions
 
     print(f"Total transactions to export: {len(unknown_transactions)}")
 
