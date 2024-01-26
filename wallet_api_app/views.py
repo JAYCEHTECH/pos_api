@@ -2240,7 +2240,6 @@ def hubtel_webhook(request):
 # In your Django views.py file
 
 @csrf_exempt
-@csrf_exempt
 def export_unknown_transactions(request):
     existing_excel_path = 'wallet_api_app/ALL PACKAGES LATEST.xlsx'  # Update with your file path
     existing_df = pd.read_excel(existing_excel_path)
@@ -2259,12 +2258,7 @@ def export_unknown_transactions(request):
         bundle_volume = transaction.get('data_volume', None)
         number = transaction.get('number', None)
 
-        print(bundle_volume)
-        print(number)
-
-        if bundle_volume is not None and number is not None:
-            # Append the new data to the existing DataFrame
-            existing_df = existing_df.append({'NUMBER': number, 'DATA GB': bundle_volume}, ignore_index=True)
+        existing_df = existing_df.append({'NUMBER': number, 'DATA GB': bundle_volume}, ignore_index=True)
 
         counter += 1
 
@@ -2288,6 +2282,7 @@ def export_unknown_transactions(request):
     response['Content-Disposition'] = 'attachment; filename=unknown_transactions.xlsx'
 
     return response
+
 
 
 
