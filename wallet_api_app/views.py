@@ -2249,10 +2249,9 @@ def export_unknown_transactions(request):
 
     for doc in documents:
         print(counter)
-        # Use to_dict with explicit field_paths
-        transaction = doc.to_dict(field_paths=['data_volume', 'number'])
+        transaction = doc.to_dict()
 
-        # Extract required fields
+        # Explicitly specify the fields you want
         bundle_volume = transaction.get('data_volume', None)
         number = transaction.get('number', None)
 
@@ -2282,6 +2281,7 @@ def export_unknown_transactions(request):
     response['Content-Disposition'] = 'attachment; filename=unknown_transactions.xlsx'
 
     return response
+
 
 
 
