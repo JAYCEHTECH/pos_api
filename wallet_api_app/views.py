@@ -2283,6 +2283,8 @@ def export_unknown_transactions(request):
 
         counter += 1
 
+        doc.reference.update({'batch_id': 'accepted', 'status': 'Processing'})
+
         # Uncomment the following lines if you want to limit to 10 transactions
         # if counter >= 10:
         #     break  # Break out of the loop after collecting 10 transactions
