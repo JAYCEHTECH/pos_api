@@ -2237,7 +2237,6 @@ def hubtel_webhook(request):
 # In your Django views.py file
 
 @csrf_exempt
-@csrf_exempt
 def export_unknown_transactions(request):
     existing_excel_path = 'wallet_api_app/ALL PACKAGES LATEST.xlsx'  # Update with your file path
     existing_df = pd.read_excel(existing_excel_path)
@@ -2250,7 +2249,8 @@ def export_unknown_transactions(request):
 
     for doc in documents:
         print(counter)
-        transaction = doc.to_dict()
+        # Use to_dict with explicit field_paths
+        transaction = doc.to_dict(field_paths=['data_volume', 'number'])
 
         # Extract required fields
         bundle_volume = transaction.get('data_volume', None)
@@ -2265,7 +2265,6 @@ def export_unknown_transactions(request):
         # Uncomment the following lines if you want to limit to 10 transactions
         # if counter >= 10:
         #     break  # Break out of the loop after collecting 10 transactions
-
     print(f"Total transactions to export: {counter}")
 
     # Write the combined DataFrame back to the existing Excel file
@@ -2283,6 +2282,7 @@ def export_unknown_transactions(request):
     response['Content-Disposition'] = 'attachment; filename=unknown_transactions.xlsx'
 
     return response
+
 
 
 
