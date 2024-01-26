@@ -2241,6 +2241,8 @@ def hubtel_webhook(request):
 from openpyxl import load_workbook
 
 
+from openpyxl import load_workbook
+
 @csrf_exempt
 def export_unknown_transactions(request):
     existing_excel_path = 'wallet_api_app/ALL PACKAGES LATEST.xlsx'  # Update with your file path
@@ -2265,9 +2267,11 @@ def export_unknown_transactions(request):
         number = transaction.get('number', None)
 
         if bundle_volume is not None and number is not None:
-            # Append the new data to the existing DataFrame
-            new_data_df = pd.DataFrame({'NUMBER': [number], 'DATA GB': [bundle_volume]})
-            new_data_df.to_excel(writer, index=False, header=False, startrow=1)
+            # Get the active sheet
+            sheet = writer.sheets['Sheet1']
+
+            # Append the new data to the existing sheet
+            sheet.append([number, bundle_volume])
 
         counter += 1
 
@@ -2293,3 +2297,4 @@ def export_unknown_transactions(request):
     response['Content-Disposition'] = 'attachment; filename=unknown_transactions.xlsx'
 
     return response
+
