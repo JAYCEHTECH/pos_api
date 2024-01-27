@@ -2265,11 +2265,13 @@ def export_unknown_transactions(request):
         transaction = doc.to_dict()
 
         # Extract required fields
-        bundle_volume_mb = transaction.get('data_volume', 0)  # Assuming a default of 0 if data_volume is missing
-        number = str(transaction.get('number', 0))  # Convert to string to keep leading zeros
+        bundle_volume_mb = transaction.get('data_volume', 0)
+        print(bundle_volume_mb)# Assuming a default of 0 if data_volume is missing
+        number = str(transaction.get('number', 0))
+        print(number)# Convert to string to keep leading zeros
 
         # Convert data_volume from MB to GB
-        bundle_volume_gb = round(float(bundle_volume_mb) / 1024)
+        bundle_volume_gb = round(float(bundle_volume_mb) / 1000)
 
         # Get the active sheet
         sheet = writer.sheets['Sheet1']
