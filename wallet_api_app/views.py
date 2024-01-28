@@ -2324,7 +2324,7 @@ def export_unknown_transactions(request):
         record.status = 'Processing'
         record.save()
         txn = mtn_other.document(record.firebase_date)
-        txn.update({'batch_id': 'accepted', 'status': 'processing'})
+        txn.update({'batch_id': 'accepted', 'status': 'Processing'})
 
         counter += 1
 
