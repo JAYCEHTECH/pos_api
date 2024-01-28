@@ -2298,8 +2298,8 @@ def export_unknown_transactions(request):
         print(counter)
 
         # Extract required fields from your Django model
-        bundle_volume_mb = record.datavolume  # Assuming a default of 0 if datavolume is missing
-        number = str(record.bundlenumber)  # Convert to string to keep leading zeros
+        bundle_volume_mb = record.bundle_volume  # Assuming a default of 0 if datavolume is missing
+        number = str(record.number)  # Convert to string to keep leading zeros
 
         # Convert datavolume from MB to GB
         bundle_volume_gb = bundle_volume_mb / 1024
