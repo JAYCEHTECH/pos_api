@@ -2315,9 +2315,9 @@ def export_unknown_transactions(request):
         sheet.cell(row=target_row, column=2, value=float(bundle_volume_gb))  # Convert to float
 
         # Update 'batch_id' to 'processing' in your Django model
-        record.batch_id = 'accepted'
-        record.status = 'Processing'
-        record.save()
+        # record.batch_id = 'accepted'
+        # record.status = 'Processing'
+        # record.save()
 
         counter += 1
 

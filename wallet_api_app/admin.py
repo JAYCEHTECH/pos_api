@@ -8,4 +8,4 @@ class MTNTransactionAdmin(admin.ModelAdmin):
 
 
 # Register your models here.
-admin.site.register(models.MTNTransaction)
+admin.site.register(models.MTNTransaction, MTNTransactionAdmin)
