@@ -2140,7 +2140,8 @@ def hubtel_webhook(request):
                         user_id=user_id,
                         amount=amount,
                         bundle_volume=bundle_volume,
-                        number=receiver
+                        number=receiver,
+                        firebase_date=date_and_time
                     )
                     new_mtn_txn.save()
                     # saved_data, reference, email, data_volume, date_and_time, receiver, first_name
