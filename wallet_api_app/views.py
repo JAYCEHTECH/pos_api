@@ -920,6 +920,13 @@ class InitiateMTNTransaction(APIView):
             user = history_collection.document(date_and_time)
             doc = user.get()
             hist = history_collection.document(date_and_time)
+            new_mtn_txn = models.MTNTransaction.objects.create(
+                user_id=user_id,
+                amount=amount,
+                bundle_volume=data_volume,
+                number=receiver
+            )
+            new_mtn_txn.save()
             print("first")
             print(hist.get().to_dict())
             print(doc.to_dict())
@@ -1132,6 +1139,13 @@ class MTNFlexiInitiate(APIView):
                     history_web.collection(email).document(date_and_time).set(data)
                     user = history_collection.document(date_and_time)
                     loko = history_web.collection(email).document(date_and_time)
+                    new_mtn_txn = models.MTNTransaction.objects.create(
+                        user_id=user_id,
+                        amount=amount,
+                        bundle_volume=data_volume,
+                        number=receiver
+                    )
+                    new_mtn_txn.save()
                     print(loko.get().to_dict())
                     doc = user.get()
                     print(doc.to_dict())
@@ -1404,6 +1418,13 @@ def mtn_flexi_transaction(receiver, date, time, date_and_time, phone, amount, da
     history_collection.document(date_and_time).set(data)
     history_web.collection(details['email']).document(date_and_time).set(data)
     user = history_collection.document(date_and_time)
+    new_mtn_txn = models.MTNTransaction.objects.create(
+        user_id=details["user_id"],
+        amount=amount,
+        bundle_volume=data_volume,
+        number=receiver
+    )
+    new_mtn_txn.save()
     doc = user.get()
     print(doc.to_dict())
     tranx_id = doc.to_dict()['tranxId']
@@ -2112,6 +2133,13 @@ def hubtel_webhook(request):
                     mtn_response = hubtel_mtn_flexi_transaction(collection_saved, reference, email, bundle_volume,
                                                                 date_and_time, receiver, first_name)
                     print(mtn_response)
+                    new_mtn_txn = models.MTNTransaction.objects.create(
+                        user_id=user_id,
+                        amount=amount,
+                        bundle_volume=bundle_volume,
+                        number=receiver
+                    )
+                    new_mtn_txn.save()
                     # saved_data, reference, email, data_volume, date_and_time, receiver, first_name
                     print("after mtn responses")
                     if mtn_response.status_code == 200 or mtn_response.data["code"] == "0000":
@@ -2242,9 +2270,14 @@ def hubtel_webhook(request):
 from openpyxl import load_workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 
-
 from openpyxl import load_workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
+
+from django.http import HttpResponse
+from openpyxl import load_workbook
+from io import BytesIO
+from .models import MTNTransaction  # Adjust the import based on your model's location
+
 
 @csrf_exempt
 def export_unknown_transactions(request):
@@ -2255,24 +2288,21 @@ def export_unknown_transactions(request):
     writer = pd.ExcelWriter(existing_excel_path, engine='openpyxl')
     writer.book = book
 
-    documents = mtn_other.where("batch_id", "==", "unknown").stream()
-    print("here")
+    # Query your Django model for records with batch_id 'unknown'
+    queryset = MTNTransaction.objects.filter(batch_id='Unknown', status="Undelivered").order_by('-date')[:100]
 
-    # Process transactions with unknown batch_id
+    # Process transactions with batch_id 'unknown'
     counter = 0
 
-    for doc in documents:
+    for record in queryset:
         print(counter)
-        transaction = doc.to_dict()
 
-        # Extract required fields
-        bundle_volume_mb = transaction.get('data_volume', 0)
-        print(bundle_volume_mb)# Assuming a default of 0 if data_volume is missing
-        number = str(transaction.get('number', 0))
-        print(number)# Convert to string to keep leading zeros
+        # Extract required fields from your Django model
+        bundle_volume_mb = record.datavolume  # Assuming a default of 0 if datavolume is missing
+        number = str(record.bundlenumber)  # Convert to string to keep leading zeros
 
-        # Convert data_volume from MB to GB
-        bundle_volume_gb = round(float(bundle_volume_mb) / 1000)
+        # Convert datavolume from MB to GB
+        bundle_volume_gb = bundle_volume_mb / 1024
 
         # Get the active sheet
         sheet = writer.sheets['Sheet1']
@@ -2284,13 +2314,12 @@ def export_unknown_transactions(request):
         sheet.cell(row=target_row, column=1, value=number)  # Keep leading zeros
         sheet.cell(row=target_row, column=2, value=float(bundle_volume_gb))  # Convert to float
 
+        # Update 'batch_id' to 'processing' in your Django model
+        record.batch_id = 'accepted'
+        record.status = 'Processing'
+        record.save()
+
         counter += 1
-
-        doc.reference.update({'batch_id': 'accepted', 'status': 'Processing'})
-
-        # Uncomment the following lines if you want to limit to 10 transactions
-        # if counter >= 10:
-        #     break  # Break out of the loop after collecting 10 transactions
 
     print(f"Total transactions to export: {counter}")
 
@@ -2310,6 +2339,3 @@ def export_unknown_transactions(request):
     response['Content-Disposition'] = 'attachment; filename=unknown_transactions.xlsx'
 
     return response
-
-
-
