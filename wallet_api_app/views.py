@@ -2326,10 +2326,10 @@ def export_unknown_transactions(request):
         txn = mtn_other.document(record.firebase_date)
         txn.update({'batch_id': 'accepted', 'status': 'Processing'})
 
-        user_details = get_user_details(record.user_id)
-        print(user_details)
-        email = user_details['email']
-        history_web.collection(email).document(record.firebase_date).update({'batch_id': 'accepted', 'status': 'Processing'})
+        # user_details = get_user_details(record.user_id)
+        # print(user_details)
+        # email = user_details['email']
+        # history_web.collection(email).document(record.firebase_date).update({'batch_id': 'accepted', 'status': 'Processing'})
         # txn2 = history_web(datetime)
         # txn2.update({'batch_id': 'accepted', 'status': 'Processing'})
 
