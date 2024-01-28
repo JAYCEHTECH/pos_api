@@ -924,7 +924,8 @@ class InitiateMTNTransaction(APIView):
                 user_id=user_id,
                 amount=amount,
                 bundle_volume=data_volume,
-                number=receiver
+                number=receiver,
+                firebase_date=date_and_time
             )
             new_mtn_txn.save()
             print("first")
@@ -1143,7 +1144,8 @@ class MTNFlexiInitiate(APIView):
                         user_id=user_id,
                         amount=amount,
                         bundle_volume=data_volume,
-                        number=receiver
+                        number=receiver,
+                        firebase_date=date_and_time
                     )
                     new_mtn_txn.save()
                     print(loko.get().to_dict())
@@ -1422,7 +1424,8 @@ def mtn_flexi_transaction(receiver, date, time, date_and_time, phone, amount, da
         user_id=details["user_id"],
         amount=amount,
         bundle_volume=data_volume,
-        number=receiver
+        number=receiver,
+        firebase_date=date_and_time
     )
     new_mtn_txn.save()
     doc = user.get()
@@ -2319,6 +2322,8 @@ def export_unknown_transactions(request):
         record.batch_id = 'accepted'
         record.status = 'Processing'
         record.save()
+        txn = mtn_other.document(record.firebase_date)
+        txn.update({'batch_id': 'accepted', 'status': 'processing'})
 
         counter += 1
 
