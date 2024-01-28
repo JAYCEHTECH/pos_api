@@ -2289,7 +2289,7 @@ def export_unknown_transactions(request):
     writer.book = book
 
     # Query your Django model for records with batch_id 'unknown'
-    queryset = MTNTransaction.objects.filter(batch_id='Unknown', status="Undelivered").order_by('-date')[:100]
+    queryset = MTNTransaction.objects.filter(batch_id='Unknown', status="Undelivered").order_by('-status')[:100]
 
     # Process transactions with batch_id 'unknown'
     counter = 0
@@ -2302,7 +2302,7 @@ def export_unknown_transactions(request):
         number = str(record.number)  # Convert to string to keep leading zeros
 
         # Convert datavolume from MB to GB
-        bundle_volume_gb = bundle_volume_mb / 1024
+        bundle_volume_gb = round(float(bundle_volume_mb) / 1000)
 
         # Get the active sheet
         sheet = writer.sheets['Sheet1']
