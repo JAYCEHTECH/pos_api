@@ -24,7 +24,7 @@ class MTNTransaction(models.Model):
     batch_id = models.CharField(max_length=200, default="Unknown")
     number = models.CharField(max_length=200, null=False, blank=False)
     date = models.DateTimeField(auto_now_add=True)
-    firebase_date = models.CharField(max_length=200, null=False, blank=False)
+    # firebase_date = models.CharField(max_length=200, null=False, blank=False)
 
 
 
