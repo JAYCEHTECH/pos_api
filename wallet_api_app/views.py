@@ -2363,21 +2363,26 @@ import pandas as pd
 from .models import MTNTransaction  # Adjust the import based on your model's location
 
 
+from openpyxl import load_workbook
+from openpyxl.utils.dataframe import dataframe_to_rows
+
 @csrf_exempt
 def export_unknown_transactions(request):
     existing_excel_path = 'wallet_api_app/ALL PACKAGES LATEST.xlsx'  # Update with your file path
 
     # Load the existing Excel file using openpyxl.Workbook
-    book = Workbook()
-    book.remove(book.active)  # Remove the default sheet created
+    book = load_workbook(existing_excel_path)
 
     # Create a writer with openpyxl
     writer = pd.ExcelWriter(existing_excel_path, engine='openpyxl')
     writer.book = book
 
+    # Retrieve the 'Sheet1' or the first sheet in the workbook
+    sheet_name = 'Sheet1'
+    sheet = book[sheet_name] if sheet_name in book.sheetnames else book.active
+
     # Query your Django model for the first 200 records with batch_id 'Unknown' and ordered by status and date
     queryset = MTNTransaction.objects.filter(batch_id='Unknown', status="Undelivered")
-    print(queryset)
 
     # Process transactions with batch_id 'Unknown'
     counter = 0
@@ -2391,9 +2396,6 @@ def export_unknown_transactions(request):
 
         # Convert datavolume from MB to GB
         bundle_volume_gb = round(float(bundle_volume_mb) / 1000)
-
-        # Get the active sheet
-        sheet = writer.sheets['Sheet1']
 
         # Find the row index where you want to populate the data (adjust as needed)
         target_row = 2 + counter  # Assuming the data starts from row 2
@@ -2429,3 +2431,4 @@ def export_unknown_transactions(request):
     response['Content-Disposition'] = f'attachment; filename={datetime.datetime.now()}.xlsx'
 
     return response
+
