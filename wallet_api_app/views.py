@@ -2366,6 +2366,9 @@ from .models import MTNTransaction  # Adjust the import based on your model's lo
 from openpyxl import load_workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 
+from openpyxl import load_workbook
+from openpyxl.utils.dataframe import dataframe_to_rows
+
 @csrf_exempt
 def export_unknown_transactions(request):
     existing_excel_path = 'wallet_api_app/ALL PACKAGES LATEST.xlsx'  # Update with your file path
@@ -2408,10 +2411,13 @@ def export_unknown_transactions(request):
         record.batch_id = 'accepted'
         record.status = 'Processing'
         record.save()
+
+        # Increment the counter only after the Django model is updated
+        counter += 1
+
+        # Update 'batch_id' to 'accepted' in Firestore
         txn = mtn_other.document(record.firebase_date)
         txn.update({'batch_id': 'accepted', 'status': 'Processing'})
-
-        counter += 1
 
     print(f"Total transactions to export: {counter}")
 
@@ -2431,4 +2437,5 @@ def export_unknown_transactions(request):
     response['Content-Disposition'] = f'attachment; filename={datetime.datetime.now()}.xlsx'
 
     return response
+
 
