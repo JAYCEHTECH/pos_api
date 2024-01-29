@@ -2365,9 +2365,6 @@ from .models import MTNTransaction  # Adjust the import based on your model's lo
 from openpyxl import load_workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 
-from openpyxl import load_workbook
-from openpyxl.utils.dataframe import dataframe_to_rows
-
 
 @csrf_exempt
 def export_unknown_transactions(request):
@@ -2412,10 +2409,7 @@ def export_unknown_transactions(request):
         record.status = 'Processing'
         record.save()
 
-        # Increment the counter only after the Django model is updated
         counter += 1
-
-        # Update 'batch_id' to 'accepted' in Firestore
         txn = mtn_other.document(record.firebase_date)
         txn.update({'batch_id': 'accepted', 'status': 'Processing'})
 
