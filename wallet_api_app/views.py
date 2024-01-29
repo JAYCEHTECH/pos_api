@@ -2362,12 +2362,12 @@ from io import BytesIO
 import pandas as pd
 from .models import MTNTransaction  # Adjust the import based on your model's location
 
-
 from openpyxl import load_workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 
 from openpyxl import load_workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
+
 
 @csrf_exempt
 def export_unknown_transactions(request):
@@ -2437,5 +2437,3 @@ def export_unknown_transactions(request):
     response['Content-Disposition'] = f'attachment; filename={datetime.datetime.now()}.xlsx'
 
     return response
-
-
