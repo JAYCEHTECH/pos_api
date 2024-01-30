@@ -2281,6 +2281,8 @@ from openpyxl import load_workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 
 
+from openpyxl import load_workbook
+
 @csrf_exempt
 def export_unknown_transactions(request):
     existing_excel_path = 'wallet_api_app/ALL PACKAGES LATEST.xlsx'  # Update with your file path
@@ -2288,13 +2290,14 @@ def export_unknown_transactions(request):
     # Load the existing Excel file using openpyxl.Workbook
     book = load_workbook(existing_excel_path)
 
-    # Create a writer with openpyxl
-    writer = pd.ExcelWriter(existing_excel_path, engine='openpyxl')
-    writer.book = book
-
-    # Retrieve the 'Sheet1' or the first sheet in the workbook
+    # Get the active sheet
     sheet_name = 'Sheet1'
     sheet = book[sheet_name] if sheet_name in book.sheetnames else book.active
+
+    # Clear existing data from the sheet (excluding headers)
+    for row in sheet.iter_rows(min_row=2, max_col=sheet.max_column, max_row=sheet.max_row):
+        for cell in row:
+            cell.value = None
 
     # Query your Django model for the first 200 records with batch_id 'Unknown' and ordered by status and date
     queryset = MTNTransaction.objects.filter(batch_id='Unknown', status="Undelivered")[:70]
@@ -2331,18 +2334,18 @@ def export_unknown_transactions(request):
     print(f"Total transactions to export: {counter}")
 
     # Save changes to the existing Excel file
-    writer.save()
+    book.save(existing_excel_path)
 
     # You can continue with the response as needed
     excel_buffer = BytesIO()
-    writer.close()
+
+    # Save the workbook to the buffer
     book.save(excel_buffer)
 
-    excel_buffer.seek(0)
-
     # Create a response with the Excel file
-    response = HttpResponse(excel_buffer.read(),
+    response = HttpResponse(excel_buffer.getvalue(),
                             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = f'attachment; filename={datetime.datetime.now()}.xlsx'
 
     return response
+
