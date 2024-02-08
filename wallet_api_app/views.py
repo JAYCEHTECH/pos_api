@@ -1061,7 +1061,11 @@ class MTNFlexiInitiate(APIView):
                 date_and_time = datetime.datetime.now().isoformat()
                 if "wallet" == "wallet":
                     print("used this")
-                    enough_balance = check_user_balance_against_price(data['user_id'], amount_to_be_deducted)
+                    try:
+                        enough_balance = check_user_balance_against_price(data['user_id'], amount_to_be_deducted)
+                    except:
+                        return Response({'code': '0001', 'message': f'User ID does not exist: User ID provided: {user_id}'},
+                                        status=status.HTTP_400_BAD_REQUEST)
                 else:
                     enough_balance = True
                     print("not wallet")
