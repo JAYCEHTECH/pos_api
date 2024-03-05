@@ -960,10 +960,17 @@ class InitiateMTNTransaction(APIView):
                 'type': "MTN Master Bundle"
             }
             mtn_other.document(date_and_time).set(second_data)
-            user22 = mtn_other.document(date_and_time)
-            pu = user22.get()
-            print(pu.to_dict())
-            print("pu")
+            tot = user_collection.document('9VA0qyq6lXYPZ6Ut867TVcBvF2t1')
+            print(tot.get().to_dict())
+            try:
+                print(tot.get().to_dict()['mtn_total_sales'])
+                previous_sale = tot.get().to_dict()['mtn_total_sales']
+                print(f"Previous Sale: {previous_sale}")
+                new_sale = float(previous_sale) + float(amount)
+                print(new_sale)
+                user_collection.document('9VA0qyq6lXYPZ6Ut867TVcBvF2t1').update({'mtn_total_sales': new_sale})
+            except:
+                user_collection.document('9VA0qyq6lXYPZ6Ut867TVcBvF2t1').update({'mtn_total_sales': amount})
             mail_doc_ref = mail_collection.document()
             file_path = 'wallet_api_app/mtn_maill.txt'  # Replace with your file path
 
@@ -1182,10 +1189,17 @@ class MTNFlexiInitiate(APIView):
                         'type': "MTN Master Bundle"
                     }
                     mtn_other.document(date_and_time).set(second_data)
-                    user22 = mtn_other.document(date_and_time)
-                    pu = user22.get()
-                    print(pu.to_dict())
-                    print("pu")
+                    tot = user_collection.document('9VA0qyq6lXYPZ6Ut867TVcBvF2t1')
+                    print(tot.get().to_dict())
+                    try:
+                        print(tot.get().to_dict()['mtn_total_sales'])
+                        previous_sale = tot.get().to_dict()['mtn_total_sales']
+                        print(f"Previous Sale: {previous_sale}")
+                        new_sale = float(previous_sale) + float(amount)
+                        print(new_sale)
+                        user_collection.document('9VA0qyq6lXYPZ6Ut867TVcBvF2t1').update({'mtn_total_sales': new_sale})
+                    except:
+                        user_collection.document('9VA0qyq6lXYPZ6Ut867TVcBvF2t1').update({'mtn_total_sales': amount})
                     mail_doc_ref = mail_collection.document()
                     file_path = 'wallet_api_app/mtn_maill.txt'  # Replace with your file path
 
@@ -1460,10 +1474,17 @@ def mtn_flexi_transaction(receiver, date, time, date_and_time, phone, amount, da
         'type': "MTN Master Bundle"
     }
     mtn_other.document(date_and_time).set(second_data)
-    user22 = mtn_other.document(date_and_time)
-    pu = user22.get()
-    print(pu.to_dict())
-    print("pu")
+    tot = user_collection.document('9VA0qyq6lXYPZ6Ut867TVcBvF2t1')
+    print(tot.get().to_dict())
+    try:
+        print(tot.get().to_dict()['mtn_total_sales'])
+        previous_sale = tot.get().to_dict()['mtn_total_sales']
+        print(f"Previous Sale: {previous_sale}")
+        new_sale = float(previous_sale) + float(amount)
+        print(new_sale)
+        user_collection.document('9VA0qyq6lXYPZ6Ut867TVcBvF2t1').update({'mtn_total_sales': new_sale})
+    except:
+        user_collection.document('9VA0qyq6lXYPZ6Ut867TVcBvF2t1').update({'mtn_total_sales': amount})
     mail_doc_ref = mail_collection.document()
     file_path = 'wallet_api_app/mtn_maill.txt'  # Replace with your file path
 
@@ -1499,7 +1520,7 @@ def mtn_flexi_transaction(receiver, date, time, date_and_time, phone, amount, da
     return Response(data={'code': '0000', 'message': "Transaction Saved"}, status=status.HTTP_200_OK)
 
 
-def hubtel_mtn_flexi_transaction(saved_data, reference, email, data_volume, date_and_time, receiver, first_name):
+def hubtel_mtn_flexi_transaction(saved_data, reference, email, data_volume, date_and_time, receiver, first_name, amount):
     history_collection.document(reference).set(saved_data)
     history_web.collection(email).document(reference).set(saved_data)
     user = history_collection.document(reference)
@@ -1508,10 +1529,17 @@ def hubtel_mtn_flexi_transaction(saved_data, reference, email, data_volume, date
     tranx_id = doc.to_dict()['tranxId']
     second_data = saved_data
     mtn_other.document(reference).set(second_data)
-    user22 = mtn_other.document(reference)
-    pu = user22.get()
-    print(pu.to_dict())
-    print("pu")
+    tot = user_collection.document('9VA0qyq6lXYPZ6Ut867TVcBvF2t1')
+    print(tot.get().to_dict())
+    try:
+        print(tot.get().to_dict()['mtn_total_sales'])
+        previous_sale = tot.get().to_dict()['mtn_total_sales']
+        print(f"Previous Sale: {previous_sale}")
+        new_sale = float(previous_sale) + float(amount)
+        print(new_sale)
+        user_collection.document('9VA0qyq6lXYPZ6Ut867TVcBvF2t1').update({'mtn_total_sales': new_sale})
+    except:
+        user_collection.document('9VA0qyq6lXYPZ6Ut867TVcBvF2t1').update({'mtn_total_sales': amount})
     mail_doc_ref = mail_collection.document()
     file_path = 'wallet_api_app/mtn_maill.txt'  # Replace with your file path
 
@@ -2138,7 +2166,7 @@ def hubtel_webhook(request):
                     }
                     collection_saved = history_collection.document(reference).get().to_dict()
                     mtn_response = hubtel_mtn_flexi_transaction(collection_saved, reference, email, bundle_volume,
-                                                                date_and_time, receiver, first_name)
+                                                                date_and_time, receiver, first_name, amount)
                     print(mtn_response)
                     new_mtn_txn = models.MTNTransaction.objects.create(
                         user_id=user_id,
