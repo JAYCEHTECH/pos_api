@@ -1060,10 +1060,10 @@ class MTNFlexiInitiate(APIView):
             15000: 48,
             20000: 65,
             25000: 80,
-            30000: 95,
-            40000: 130,
+            30000: 97,
+            40000: 135,
             50000: 160,
-            100000: 315
+            100000: 310
         }
         # Check if the token matches the one in the environment variable
         if token != config("AT"):
