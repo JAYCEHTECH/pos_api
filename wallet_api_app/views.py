@@ -1048,22 +1048,22 @@ class MTNFlexiInitiate(APIView):
         token = request.headers.get('Authorization')
         required_params = ['user_id', 'receiver', 'reference', 'data_volume', 'amount', 'channel']
         prices_dict = {
-            1000: 3.9,
-            2000: 7.8,
-            3000: 11,
-            4000: 14.5,
-            5000: 18,
-            6000: 21,
-            7000: 24.5,
-            8000: 27,
-            10000: 32,
+            1000: 4,
+            2000: 8,
+            3000: 11.5,
+            4000: 15.5,
+            5000: 19,
+            6000: 20.5,
+            7000: 24,
+            8000: 28,
+            10000: 33,
             15000: 48,
-            20000: 64,
-            25000: 78,
-            30000: 97,
-            40000: 134,
+            20000: 65,
+            25000: 80,
+            30000: 95,
+            40000: 130,
             50000: 160,
-            100000: 295
+            100000: 315
         }
         # Check if the token matches the one in the environment variable
         if token != config("AT"):
