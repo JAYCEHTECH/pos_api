@@ -131,46 +131,78 @@ def get_all_history():
         break
 
 
-def send_ishare_bundle(first_name: str, last_name: str, buyer, receiver: str, email: str, bundle: float,
-                       reference: str):
-    url = "https://console.bestpaygh.com/api/flexi/v1/new_transaction/"
+# def send_ishare_bundle(first_name: str, last_name: str, buyer, receiver: str, email: str, bundle: float,
+#                        reference: str):
+#     url = "https://console.bestpaygh.com/api/flexi/v1/new_transaction/"
+#
+#     token = bearer_token_collection.document("Active_API_BoldAssure")
+#     token_doc = token.get()
+#     token_doc_dict = token_doc.to_dict()
+#     key = token_doc_dict['key']
+#     secret = token_doc_dict['secret']
+#     print(key)
+#     print(secret)
+#
+#     headers = {
+#         "api-key": key,
+#         "api-secret": secret,
+#         'Content-Type': 'application/json'
+#     }
+#
+#     payload = json.dumps({
+#         "first_name": first_name if first_name != "" else "First Name",
+#         "last_name": last_name if last_name != "" else "Last Name",
+#         "account_number": buyer,
+#         "receiver": receiver,
+#         "account_email": email,
+#         "reference": reference,
+#         "bundle_amount": bundle
+#     })
+#
+#     print(payload)
+#
+#     session = requests.Session()
+#     retry = Retry(connect=15, backoff_factor=0.5)
+#     adapter = HTTPAdapter(max_retries=retry)
+#     session.mount('https://', adapter)
+#
+#     response = session.post(url, headers=headers, data=payload)
+#     status_code = response.status_code
+#     print("after response")
+#
+#     return response, status_code
+
+
+def send_ishare_bundle(first_name: str, last_name: str, buyer, receiver: str, email: str, bundle: float
+                       ):
+    url = "https://backend.boldassure.net:445/live/api/context/business/transaction/new-transaction"
+
+    payload = json.dumps({
+        "accountNo": buyer,
+        "accountFirstName": first_name,
+        "accountLastName": last_name,
+        "accountMsisdn": receiver,
+        "accountEmail": email,
+        "accountVoiceBalance": 0,
+        "accountDataBalance": bundle,
+        "accountCashBalance": 0,
+        "active": True
+    })
 
     token = bearer_token_collection.document("Active_API_BoldAssure")
     token_doc = token.get()
     token_doc_dict = token_doc.to_dict()
-    key = token_doc_dict['key']
-    secret = token_doc_dict['secret']
-    print(key)
-    print(secret)
+    tokennn = token_doc_dict['ishare_bearer']
+    print(tokennn)
 
     headers = {
-        "api-key": key,
-        "api-secret": secret,
+        'Authorization': tokennn,
         'Content-Type': 'application/json'
     }
 
-    payload = json.dumps({
-        "first_name": first_name if first_name != "" else "First Name",
-        "last_name": last_name if last_name != "" else "Last Name",
-        "account_number": buyer,
-        "receiver": receiver,
-        "account_email": email,
-        "reference": reference,
-        "bundle_amount": bundle
-    })
-
-    print(payload)
-
-    session = requests.Session()
-    retry = Retry(connect=15, backoff_factor=0.5)
-    adapter = HTTPAdapter(max_retries=retry)
-    session.mount('https://', adapter)
-
-    response = session.post(url, headers=headers, data=payload)
-    status_code = response.status_code
-    print("after response")
-
-    return response, status_code
+    response = requests.request("POST", url, headers=headers, data=payload)
+    print(response.json())
+    return response
 
 
 def send_and_save_to_history(user_id, txn_type: str, txn_status: str, paid_at: str, ishare_balance: float,
@@ -214,15 +246,15 @@ def send_and_save_to_history(user_id, txn_type: str, txn_status: str, paid_at: s
 
     print("first save")
 
-    ishare_response, status_code = send_ishare_bundle(first_name=first_name, last_name=last_name, receiver=receiver,
+    ishare_response = send_ishare_bundle(first_name=first_name, last_name=last_name, receiver=receiver,
                                                       buyer=phone,
                                                       bundle=data_volume,
-                                                      email=email, reference=reference)
+                                                      email=email)
     json_response = ishare_response.json()
     print(f"hello:{json_response}")
-    status_code = status_code
+    status_code = ishare_response.status_code
     print(status_code)
-    batch_id = json_response["batch_id"]
+    batch_id = json_response["batchId"]
     print(batch_id)
 
     doc_ref = history_collection.document(date_and_time)
@@ -1028,10 +1060,10 @@ class MTNFlexiInitiate(APIView):
             15000: 48,
             20000: 64,
             25000: 78,
-            30000: 94,
-            40000: 128,
-            50000: 155,
-            100000: 290
+            30000: 97,
+            40000: 134,
+            50000: 160,
+            100000: 295
         }
         # Check if the token matches the one in the environment variable
         if token != config("AT"):
@@ -1311,16 +1343,16 @@ def webhook_send_and_save_to_history(user_id, txn_type: str, paid_at: str, ishar
     if history_collection.document(date_and_time).get().exists:
         print("first save")
 
-    ishare_response, status_code = send_ishare_bundle(first_name=first_name, last_name=last_name, receiver=receiver,
+    ishare_response = send_ishare_bundle(first_name=first_name, last_name=last_name, receiver=receiver,
                                                       buyer=phone,
                                                       bundle=data_volume,
-                                                      email=email, reference=reference)
+                                                      email=email)
     json_response = ishare_response.json()
     print(f"hello:{json_response}")
-    status_code = status_code
+    status_code = ishare_response.status_code
     print(status_code)
     try:
-        batch_id = json_response["batch_id"]
+        batch_id = json_response["batchId"]
     except KeyError:
         batch_id = "unknown"
     print(batch_id)
@@ -1334,9 +1366,7 @@ def webhook_send_and_save_to_history(user_id, txn_type: str, paid_at: str, ishar
         print("didn't find any entry to update")
     print("firebase saved")
     # return status_code, batch_id if batch_id else "No batchId", email, first_name
-    return Response(
-        data=json_response,
-        status=status.HTTP_200_OK)
+    return ishare_response
 
 
 def hubtel_webhook_send_and_save_to_history(saved_data, user_id, reference, receiver, data_volume):
@@ -1381,16 +1411,16 @@ def hubtel_webhook_send_and_save_to_history(saved_data, user_id, reference, rece
     if history_collection.document(reference).get().exists:
         print("first save")
 
-    ishare_response, status_code = send_ishare_bundle(first_name=first_name, last_name=last_name, receiver=receiver,
+    ishare_response = send_ishare_bundle(first_name=first_name, last_name=last_name, receiver=receiver,
                                                       buyer=phone,
                                                       bundle=data_volume,
-                                                      email=email, reference=reference)
+                                                      email=email)
     json_response = ishare_response.json()
     print(f"hello:{json_response}")
-    status_code = status_code
+    status_code = ishare_response.status_code
     print(status_code)
     try:
-        batch_id = json_response["batch_id"]
+        batch_id = json_response["batchId"]
     except KeyError:
         batch_id = "unknown"
     print(batch_id)
@@ -1403,9 +1433,7 @@ def hubtel_webhook_send_and_save_to_history(saved_data, user_id, reference, rece
         print("didn't find any entry to update")
     print("firebase saved")
     # return status_code, batch_id if batch_id else "No batchId", email, first_name
-    return Response(
-        data=json_response,
-        status=status.HTTP_200_OK)
+    return ishare_response
 
 
 def mtn_flexi_transaction(receiver, date, time, date_and_time, phone, amount, data_volume, details: dict, ref,
@@ -1763,13 +1791,11 @@ def paystack_webhook(request):
                                                                      txn_type="AT Premium Bundle",
                                                                      color_code="Green", data_volume=bundle_package,
                                                                      ishare_balance=0, txn_status=txn_status)
-                    data = send_response.data
-                    json_response = data
+                    data = send_response
+                    json_response = data.json()
                     print(json_response)
-                    if json_response["code"] == "0002":
+                    if data.status_code == 200:
                         return HttpResponse(status=200)
-                    elif json_response["code"] == "0001":
-                        return HttpResponse(status=500)
                     else:
                         print(send_response.status_code)
                         try:
@@ -1779,7 +1805,7 @@ def paystack_webhook(request):
 
                         print(batch_id)
 
-                        if json_response["code"] == '0000':
+                        if data.status_code == 200:
                             sms = f"Hey there\nYour account has been credited with {bundle_package}MB.\nConfirm your new balance using the AT Mobile App"
                             r_sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to={receiver}&from=Bestpay&sms={sms}"
                             response = requests.request("GET", url=r_sms_url)
@@ -2083,23 +2109,21 @@ def hubtel_webhook(request):
                     send_response = hubtel_webhook_send_and_save_to_history(collection_saved, user_id, reference,
                                                                             receiver, bundle_volume)
                     # saved_data, user_id, reference, receiver, data_volume
-                    data = send_response.data
-                    json_response = data
+                    data = send_response
+                    json_response = data.json()
                     print(json_response)
-                    if json_response["code"] == "0002":
+                    if data.status_code == 200:
                         return HttpResponse(status=200)
-                    elif json_response["code"] == "0001":
-                        return HttpResponse(status=500)
                     else:
                         print(send_response.status_code)
                         try:
-                            batch_id = json_response["batch_id"]
+                            batch_id = json_response["batchId"]
                         except KeyError:
                             return HttpResponse(status=500)
 
                         print(batch_id)
 
-                        if json_response["code"] == '0000':
+                        if data.status_code == 200:
                             sms = f"Hey there\nYour account has been credited with {bundle_volume}MB.\nConfirm your new balance using the AT Mobile App"
                             r_sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to={receiver}&from=Bestpay&sms={sms}"
                             response = requests.request("GET", url=r_sms_url)
@@ -2332,7 +2356,7 @@ def export_unknown_transactions(request):
             cell.value = None
 
     # Query your Django model for the first 200 records with batch_id 'Unknown' and ordered by status and date
-    queryset = MTNTransaction.objects.filter(batch_id='Unknown', status="Undelivered")[:45]
+    queryset = MTNTransaction.objects.filter(batch_id='Unknown', status="Undelivered")[:50]
 
     # Process transactions with batch_id 'Unknown'
     counter = 0
