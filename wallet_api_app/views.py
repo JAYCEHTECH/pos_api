@@ -1048,22 +1048,22 @@ class MTNFlexiInitiate(APIView):
         token = request.headers.get('Authorization')
         required_params = ['user_id', 'receiver', 'reference', 'data_volume', 'amount', 'channel']
         prices_dict = {
-            1000: 4.3,
-            2000: 8.5,
-            3000: 12.5,
-            4000: 15.5,
-            5000: 19,
-            6000: 23,
-            7000: 27,
-            8000: 28,
-            10000: 33,
-            15000: 49,
-            20000: 65,
-            25000: 80,
-            30000: 97,
-            40000: 135,
-            50000: 160,
-            100000: 310
+            1000: 3.9,
+            2000: 7.8,
+            3000: 11,
+            4000: 14.5,
+            5000: 18,
+            6000: 21,
+            7000: 25,
+            8000: 27,
+            10000: 32,
+            15000: 48,
+            20000: 64,
+            25000: 78,
+            30000: 94,
+            40000: 128,
+            50000: 155,
+            100000: 290
         }
         # Check if the token matches the one in the environment variable
         if token != config("AT"):
@@ -1082,7 +1082,7 @@ class MTNFlexiInitiate(APIView):
 
             missing_params = [param for param in required_params if param not in request_data]
 
-            if missing_params:
+            if mising_params:
                 print(missing_params)
                 # If any required parameter is missing, return an error response
                 return Response({'code': '0001', 'message': f'Missing parameters: {", ".join(missing_params)}'},
