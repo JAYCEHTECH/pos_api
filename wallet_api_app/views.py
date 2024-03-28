@@ -587,12 +587,12 @@ class WalletUserBalance(APIView):
                 'message': {
                     'subject': 'Wallet Topup',
                     'html': html_content,
-                    'messageId': 'Bestpay'
+                    'messageId': 'CloudHub GH'
                 }
             })
 
             sms_message = f"GHS {to_be_added} was deposited in your wallet. Available balance is now GHS {new_balance}"
-            sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to=0{user_details['phone']}&from=Bestpay&sms={sms_message}"
+            sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to=0{user_details['phone']}&from=CloudHub GH&sms={sms_message}"
             response = requests.request("GET", url=sms_url)
             print(response.status_code)
             return redirect(f"https://{callback_url}")
@@ -678,7 +678,7 @@ class InitiateTransaction(APIView):
                 print(ishare_response)
                 if code == '200' or ishare_response == 'Crediting Successful.':
                     sms = f"Hey there\nYour account has been credited with {data_volume}MB.\nConfirm your new balance using the AT Mobile App"
-                    r_sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to={receiver}&from=Bestpay&sms={sms}"
+                    r_sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to={receiver}&from=CloudHub GH&sms={sms}"
                     response = requests.request("GET", url=r_sms_url)
                     print(response.text)
                     doc_ref = history_collection.document(date_and_time)
@@ -711,7 +711,7 @@ class InitiateTransaction(APIView):
                         'message': {
                             'subject': 'AT Flexi Bundle',
                             'html': html_content,
-                            'messageId': 'Bestpay'
+                            'messageId': 'CloudHub GH'
                         }
                     })
                 else:
@@ -853,7 +853,7 @@ class InitiateBigTimeTransaction(APIView):
                 'message': {
                     'subject': 'Big Time Data',
                     'html': html_content,
-                    'messageId': 'Bestpay'
+                    'messageId': 'CloudHub GH'
                 }
             })
             return redirect(f"https://{callback_url}")
@@ -1031,7 +1031,7 @@ class InitiateMTNTransaction(APIView):
                 'message': {
                     'subject': 'MTN Data',
                     'html': html_content,
-                    'messageId': 'Bestpay'
+                    'messageId': 'CloudHub GH'
                 }
             })
             print("got to redirect")
@@ -1260,7 +1260,7 @@ class MTNFlexiInitiate(APIView):
                         'message': {
                             'subject': 'MTN Data',
                             'html': html_content,
-                            'messageId': 'Bestpay'
+                            'messageId': 'CloudHub GH'
                         }
                     })
                     print("got to redirect")
@@ -1541,7 +1541,7 @@ def mtn_flexi_transaction(receiver, date, time, date_and_time, phone, amount, da
         'message': {
             'subject': 'MTN Data',
             'html': html_content,
-            'messageId': 'Bestpay'
+            'messageId': 'CloudHub GH'
         }
     })
     print("got to redirect")
@@ -1596,7 +1596,7 @@ def hubtel_mtn_flexi_transaction(saved_data, reference, email, data_volume, date
         'message': {
             'subject': 'MTN Data',
             'html': html_content,
-            'messageId': 'Bestpay'
+            'messageId': 'CloudHub GH'
         }
     })
     print("got to redirect")
@@ -1664,7 +1664,7 @@ def big_time_transaction(receiver, date, time, date_and_time, phone, amount, dat
         'message': {
             'subject': 'Big Time Data',
             'html': html_content,
-            'messageId': 'Bestpay'
+            'messageId': 'CloudHub GH'
         }
     })
     return Response(data={'code': '0000', 'message': "Transaction Saved"}, status=status.HTTP_200_OK)
@@ -1707,7 +1707,7 @@ def hubtel_big_time_transaction(saved_data, reference, email, data_volume, date_
         'message': {
             'subject': 'Big Time Data',
             'html': html_content,
-            'messageId': 'Bestpay'
+            'messageId': 'CloudHub GH'
         }
     })
     return Response(data={'code': '0000', 'message': "Transaction Saved"}, status=status.HTTP_200_OK)
@@ -1807,7 +1807,7 @@ def paystack_webhook(request):
 
                         if data.status_code == 200:
                             sms = f"Hey there\nYour account has been credited with {bundle_package}MB.\nConfirm your new balance using the AT Mobile App"
-                            r_sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to={receiver}&from=Bestpay&sms={sms}"
+                            r_sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to={receiver}&from=CloudHub GH&sms={sms}"
                             response = requests.request("GET", url=r_sms_url)
                             doc_ref = history_collection.document(date_and_time)
                             if doc_ref.get().exists:
@@ -1842,7 +1842,7 @@ def paystack_webhook(request):
                                 'message': {
                                     'subject': 'AT Flexi Bundle',
                                     'html': html_content,
-                                    'messageId': 'Bestpay'
+                                    'messageId': 'CloudHub GH'
                                 }
                             })
                             print("donnee")
@@ -2016,12 +2016,12 @@ def paystack_webhook(request):
                         'message': {
                             'subject': 'Wallet Topup',
                             'html': html_content,
-                            'messageId': 'Bestpay'
+                            'messageId': 'CloudHub GH'
                         }
                     })
 
                     sms_message = f"GHS {to_be_added} was deposited in your wallet. Available balance is now GHS {new_balance}"
-                    sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to=0{user_details['phone']}&from=Bestpay&sms={sms_message}"
+                    sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to=0{user_details['phone']}&from=CloudHub GH&sms={sms_message}"
                     response = requests.request("GET", url=sms_url)
                     print(response.status_code)
                     return HttpResponse(status=200)
@@ -2125,7 +2125,7 @@ def hubtel_webhook(request):
 
                         if data.status_code == 200:
                             sms = f"Hey there\nYour account has been credited with {bundle_volume}MB.\nConfirm your new balance using the AT Mobile App"
-                            r_sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to={receiver}&from=Bestpay&sms={sms}"
+                            r_sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to={receiver}&from=CloudHub GH&sms={sms}"
                             response = requests.request("GET", url=r_sms_url)
                             doc_ref = history_collection.document(date_and_time)
                             if doc_ref.get().exists:
@@ -2160,7 +2160,7 @@ def hubtel_webhook(request):
                                 'message': {
                                     'subject': 'AT Flexi Bundle',
                                     'html': html_content,
-                                    'messageId': 'Bestpay'
+                                    'messageId': 'CloudHub GH'
                                 }
                             })
                             print("donnee")
@@ -2236,7 +2236,7 @@ def hubtel_webhook(request):
                         return JsonResponse({'message': "Success"}, status=200)
                     else:
                         return HttpResponse(status=500)
-                elif txn_type == "Bestpay E - Wallet":
+                elif txn_type == "CloudHub GH E - Wallet":
                     doc_ref.update({'ishareBalance': "Paid", 'status': "Credited", "tranxId": str(tranx_id_gen())})
                     user_details = get_user_details(user_id)
                     collection_saved = history_collection.document(reference).get().to_dict()
@@ -2301,12 +2301,12 @@ def hubtel_webhook(request):
                         'message': {
                             'subject': 'Wallet Topup',
                             'html': html_content,
-                            'messageId': 'Bestpay'
+                            'messageId': 'CloudHub GH'
                         }
                     })
 
                     sms_message = f"GHS {to_be_added} was deposited in your wallet. Available balance is now GHS {new_balance}"
-                    sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to=0{user_details['phone']}&from=Bestpay&sms={sms_message}"
+                    sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to=0{user_details['phone']}&from=CloudHub GH&sms={sms_message}"
                     response = requests.request("GET", url=sms_url)
                     print(response.status_code)
                     return JsonResponse({'message': "Success"}, status=200)
