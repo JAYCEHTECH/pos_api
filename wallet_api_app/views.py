@@ -1781,6 +1781,11 @@ def paystack_webhook(request):
                     first_name = ""
                     email = ""
 
+                sms_message = f"Payment of GHS {paid_amount} received at CloudHub. \nReceipt: {reference}\n\nThank You!"
+                sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to={phone}&from=CloudHub GH&sms={sms_message}"
+                response = requests.request("GET", url=sms_url)
+                print(response.status_code)
+
                 if channel == "ishare":
                     send_response = webhook_send_and_save_to_history(user_id=user_id, date_and_time=date_and_time,
                                                                      date=date,
@@ -2079,6 +2084,7 @@ def hubtel_webhook(request):
 
             if txn_status == 'Success':
                 print("success")
+                sms_message = f"Payment of GHS {amount} received at CloudHub. \nReceipt: {reference}\n\nThank You!"
                 collection_saved = history_collection.document(reference).get().to_dict()
                 receiver = collection_saved['number']
                 bundle_volume = collection_saved['data_volume']
@@ -2089,6 +2095,10 @@ def hubtel_webhook(request):
                 txn_type = collection_saved['type']
                 user_id = collection_saved['uid']
                 print(receiver, bundle_volume, name, email, phone_number)
+
+                sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to={phone_number}&from=CloudHub GH&sms={sms_message}"
+                response = requests.request("GET", url=sms_url)
+                print(response.status_code)
 
                 doc_ref = history_collection.document(reference)
 
