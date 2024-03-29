@@ -591,7 +591,7 @@ class WalletUserBalance(APIView):
                 }
             })
 
-            sms_message = f"GHS {to_be_added} was deposited in your wallet. Available balance is now GHS {new_balance}"
+            sms_message = f"GHS {to_be_added} was deposited in your wallet. Available balance is now GHS {round(new_balance, 2)}"
             sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to=0{user_details['phone']}&from=CloudHub GH&sms={sms_message}"
             response = requests.request("GET", url=sms_url)
             print(response.status_code)
@@ -2025,7 +2025,7 @@ def paystack_webhook(request):
                         }
                     })
 
-                    sms_message = f"GHS {to_be_added} was deposited in your wallet. Available balance is now GHS {new_balance}"
+                    sms_message = f"GHS {to_be_added} was deposited in your wallet. Available balance is now GHS {round(new_balance, 2)}"
                     sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to=0{user_details['phone']}&from=CloudHub GH&sms={sms_message}"
                     response = requests.request("GET", url=sms_url)
                     print(response.status_code)
@@ -2315,7 +2315,7 @@ def hubtel_webhook(request):
                         }
                     })
 
-                    sms_message = f"GHS {to_be_added} was deposited in your wallet. Available balance is now GHS {new_balance}"
+                    sms_message = f"GHS {to_be_added} was deposited in your wallet. Available balance is now GHS {round(new_balance, 2)}"
                     sms_url = f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=UmpEc1JzeFV4cERKTWxUWktqZEs&to=0{user_details['phone']}&from=CloudHub GH&sms={sms_message}"
                     response = requests.request("GET", url=sms_url)
                     print(response.status_code)
