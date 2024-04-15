@@ -85,7 +85,7 @@ CORS_ALLOWED_ORIGINS = [  # Replace with your allowed domain(s)
     'https://www.bestpluggh.com',
     'https://www.cloudhubgh.com',
     'https://cloudhubgh-refreshed.web.app',
-    'https://www.ghdatahubs.com'
+    'https://www.ghdatahubs.com',
 ]
 
 CORS_ALLOW_METHODS = [
