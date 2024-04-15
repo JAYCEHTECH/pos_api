@@ -83,6 +83,8 @@ CORS_ALLOWED_ORIGINS = [  # Replace with your allowed domain(s)
     'https://www.gh-bay.com',
     'https://www.dataforall.store',
     'https://www.bestpluggh.com',
+    'https://www.cloudhubgh.com',
+    'https://cloudhubgh-refreshed.web.app',
     'https://www.ghdatahubs.com'
 ]
 
