@@ -1305,7 +1305,7 @@ def webhook_send_and_save_to_history(user_id, txn_type: str, paid_at: str, ishar
                 print(code)
                 print(ishare_response)
                 if code == '200' or ishare_response == 'Crediting Successful.':
-                    return Response(data={"code": "0002"}, status=status.HTTP_200_OK)
+                    return HttpResponse(status=200)
                 else:
                     pass
         else:
