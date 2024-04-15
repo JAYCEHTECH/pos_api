@@ -1806,7 +1806,7 @@ def paystack_webhook(request):
                         try:
                             batch_id = json_response["batch_id"]
                         except KeyError:
-                            return HttpResponse(status=500)
+                            return HttpResponse(status=200)
 
                         print(batch_id)
 
@@ -1855,7 +1855,7 @@ def paystack_webhook(request):
                         else:
                             doc_ref = history_collection.document(date_and_time)
                             doc_ref.update({'done': 'Failed'})
-                            return HttpResponse(status=500)
+                            return HttpResponse(status=200)
                 elif channel == "mtn_flexi":
                     user_details = get_user_details(user_id)
                     if user_details is not None:
